@@ -13,9 +13,23 @@ class BaseUser:
         # call 'private' load method (to be implemented per-subclass of BaseUser)
         self._load()
 
+    @property
+    def data(self) -> dict:
+        data = self.__dict__.copy()
+        data.pop('password_hash')  # remove password hash from data dict
+        return data
+
     def _load(self):
         """
         Loader method used to fetch actual User info by ID.
+        """
+        raise NotImplementedError()
+    
+    def validate_password(password:str) -> bool:
+        """
+        Check a password input string against the stored password hash.
+        :password: raw string input from user to be compared against stored password hash.
+        :returns: boolean value representing password match
         """
         raise NotImplementedError()
     
@@ -27,10 +41,23 @@ class BaseUser:
         :returns: BaseUser (or subclass) instance.
         """
         raise NotImplementedError()
+    
+    @staticmethod 
+    def create(first_name:str, last_name:str, email_address:str, password:str):
+        """
+        Method used to create new user account.
+        :first_name: First name of user who owns the account.
+        :last_name: Last name of user who owns the account.
+        :email_address: Email address of the person who owns the account.
+        :password: Raw password string used to sign into the account.
+        :returns: BaseUser or subclass.
+        """
+        raise NotImplementedError()
 
     @property
     def accounts(self) -> list[BaseAccount]:
         """
         Property method that returns a list of BaseAccounts to caller. To be implemented by subclass.
+        :returns: list of BaseAccount or subclass instances.
         """
         raise NotImplementedError()

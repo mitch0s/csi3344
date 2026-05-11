@@ -1,6 +1,6 @@
 from .BaseAccount import BaseAccount
 
-class BaseTransactionItem:
+class BaseTransferItem:
     def __init__(self):
         self.creditor:BaseAccount
         self.debitor:BaseAccount

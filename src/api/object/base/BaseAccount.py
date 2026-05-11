@@ -1,4 +1,5 @@
-from .BaseTransaction import BaseTransaction
+from .BaseTransfer import BaseTransfer
+
 
 
 class BaseAccount:
@@ -15,5 +16,5 @@ class BaseAccount:
         raise NotImplementedError()
     
     @property
-    def transactions(self) -> list[BaseTransaction]:
+    def transactions(self) -> list[BaseTransfer]:
         raise NotImplementedError()

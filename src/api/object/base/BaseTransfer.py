@@ -1,8 +1,9 @@
 
-class BaseTransaction:
+class BaseTransfer:
     def __init__(self, id:int):
         self.id:int = id
         self.user_note:str
+        self.total_cents:int
         self.created_utc:str
         self.status:str
         self._load()
@@ -16,8 +17,15 @@ class BaseTransaction:
     @property
     def items() -> list:
         """
-        Property method that fetches and returns a list of BaseTransactionItems (transaction line items).
-        :returns: list[BaseTransactionItem]
+        Property method that fetches and returns a list of BaseTransferItems (transaction line items).
+        :returns: list[BaseTransferItem]
+        """
+        raise NotImplementedError()
+    
+    @property
+    def amount_cents(self):
+        """
+        Property method that returns the total transaction amount (including fees)
         """
         raise NotImplementedError()
 

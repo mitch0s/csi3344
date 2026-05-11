@@ -1,6 +1,7 @@
 from .SQLiteAccount import SQLiteAccount
-from api.object.base import BaseUser, BaseAccount
+from api.object.base import BaseUser, BaseAccount, UserNotFoundError
 from api.db.sqlite import connection
+from api.util.hashing import *
 
 
 class SQLiteUser(BaseUser):
@@ -23,7 +24,7 @@ class SQLiteUser(BaseUser):
 
             # raise if not found
             if row is None:
-                raise Exception("user not found")
+                raise UserNotFoundError("user not found")
 
             self.id = row[0]
             self.first_name = row[1]
@@ -41,31 +42,24 @@ class SQLiteUser(BaseUser):
         conn = connection()
         try:
             cur = conn.cursor()
-            cur.execute(
-                "SELECT id FROM user WHERE email_address = ?",
-                (email_address,)
-            )
+            cur.execute("SELECT id FROM user WHERE email_address = ?", (email_address,))
             row = cur.fetchone()
-
             if row is None:
                 return None
-
             return SQLiteUser(row[0])
-
         finally:
             conn.close()
+
+    def validate_password(self, password:str):
+        return verify_password(password, self.password_hash)
 
     @property
     def accounts(self) -> list[BaseAccount]:
         conn = connection()
         try:
             cur = conn.cursor()
-            cur.execute(
-                "SELECT id FROM account WHERE user_id = ?",
-                (self.id,)
-            )
+            cur.execute("SELECT id FROM account WHERE user_id = ?", (self.id,))
             rows = cur.fetchall()
-
             return [SQLiteAccount(row[0]) for row in rows]
 
         finally:
