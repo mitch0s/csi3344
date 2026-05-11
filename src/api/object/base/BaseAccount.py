@@ -17,7 +17,7 @@ class BaseAccount:
         raise NotImplementedError()
     
     @property
-    def transactions(self) -> list[BaseTransfer]:
+    def transfers(self) -> list[BaseTransfer]:
         raise NotImplementedError()
     
     @property

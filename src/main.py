@@ -16,7 +16,7 @@ async def v1_get_user(request:Request):
 async def v1_get_account_list(request:Request): 
     return await api.endpoint.v1.account.list(request)
 
-@app.get('/api/v1/account/{account_id}/')
-async def v1_get_account_list(request:Request, account_id:int): 
-    return await api.endpoint.v1.account.list(request, account_id)
+@app.get('/api/v1/account/{id}/transfers/')
+async def v1_get_account_list(request:Request, id:int): 
+    return await api.endpoint.v1.account.transactions(request, id)
 

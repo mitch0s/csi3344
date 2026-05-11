@@ -68,7 +68,6 @@ class SQLiteTransfer(BaseTransfer):
             for row in rows:
                 item = {
                     "id": row[0],
-                    "transaction_id": row[1],
                     "cr_account_id": row[2],
                     "dr_account_id": row[3],
                     "amount_cents": row[4],
@@ -89,8 +88,17 @@ class SQLiteTransfer(BaseTransfer):
             conn.close()
 
     @property
-    def amount_cents(self):
+    def amount_cents(self) -> int:
         # ensure items loaded first
         if self._amount is None:
             _ = self.items
         return self._amount
+    
+    @property
+    def data(self) -> dict:
+        return {
+            'id': self.id,
+            'user_note': self.user_note,
+            'amount_cents': self.amount_cents,
+            'items': self.items
+        }

@@ -56,7 +56,7 @@ class SQLiteAccount(BaseAccount):
             conn.close()
 
     @property
-    def transactions(self):
+    def transfers(self):
         conn = connection()
         try:
             cur = conn.cursor()
