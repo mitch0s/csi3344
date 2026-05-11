@@ -8,3 +8,6 @@ class BaseFee:
     def _load(self):
         raise NotImplementedError()
 
+    @property
+    def data(self) -> dict:
+        raise NotImplementedError()

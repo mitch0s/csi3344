@@ -28,4 +28,8 @@ class BaseTransfer:
         Property method that returns the total transaction amount (including fees)
         """
         raise NotImplementedError()
+    
+    @property
+    def data(self) -> dict:
+        raise NotImplementedError()
 

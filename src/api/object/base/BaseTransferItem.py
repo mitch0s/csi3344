@@ -5,3 +5,7 @@ class BaseTransferItem:
         self.creditor:BaseAccount
         self.debitor:BaseAccount
         self.amount_cents:int
+
+    @property
+    def data(self) -> dict:
+        raise NotImplementedError()

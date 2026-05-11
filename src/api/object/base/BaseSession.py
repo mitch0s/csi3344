@@ -14,5 +14,5 @@ class BaseSession:
 
     @property
     def data(self) -> dict:
-        return self.__dict__.copy()
+        raise NotImplementedError()
     

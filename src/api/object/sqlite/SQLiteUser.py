@@ -64,3 +64,9 @@ class SQLiteUser(BaseUser):
 
         finally:
             conn.close()
+
+    @property
+    def data(self) -> dict:
+        data = self.__dict__.copy()
+        data.pop('password_hash')  # remove password hash from data dict
+        return data

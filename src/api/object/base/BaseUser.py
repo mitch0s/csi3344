@@ -12,12 +12,10 @@ class BaseUser:
         self.status:str
         # call 'private' load method (to be implemented per-subclass of BaseUser)
         self._load()
-
+    
     @property
     def data(self) -> dict:
-        data = self.__dict__.copy()
-        data.pop('password_hash')  # remove password hash from data dict
-        return data
+        raise NotImplementedError()
 
     def _load(self):
         """

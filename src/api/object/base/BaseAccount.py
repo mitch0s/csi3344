@@ -9,6 +9,7 @@ class BaseAccount:
         self.name:str
         self.created_utc:str
         self.status:str
+        self.balance_cents:int
         # call 'private' load method
         self._load()
 
@@ -17,4 +18,8 @@ class BaseAccount:
     
     @property
     def transactions(self) -> list[BaseTransfer]:
+        raise NotImplementedError()
+    
+    @property
+    def data(self) -> dict:
         raise NotImplementedError()
