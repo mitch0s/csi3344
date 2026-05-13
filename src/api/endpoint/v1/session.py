@@ -20,8 +20,6 @@ async def create(request: Request):
 
         user.validate_password(password)
         
-        print(user.validate_password(password))
-
         session = SQLiteSession.create(user=user)
 
         return SuccessResponse(content={'session_token': session.token})

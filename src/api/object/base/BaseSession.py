@@ -21,9 +21,17 @@ class BaseSession:
 
     @property
     def data(self) -> dict:
+        """
+        Retrieve session object data as a dictionary.
+        :returns: dictionary containing session instance data
+        """
         raise NotImplementedError()
     
     @staticmethod
     def create(user:BaseUser):
+        """
+        Create and insert new session into database, return session instance.
+        :returns: BaseSession or subclass instance.
+        """
         raise NotImplementedError()
     

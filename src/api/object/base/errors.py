@@ -1,3 +1,8 @@
+# Request validation error
+class RequestValidationError(Exception):
+    def __init__(self, *args):
+        super().__init__(*args)
+
 # User errors
 class InvalidSessionError(Exception):
     def __init__(self, *args):
@@ -18,7 +23,7 @@ class AccountNotFoundError(Exception):
         super().__init__(*args)
 
 
-# Request validation error
-class RequestValidationError(Exception):
+# Fee-related errors
+class FeeNotFoundError(Exception):
     def __init__(self, *args):
         super().__init__(*args)

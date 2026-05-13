@@ -52,7 +52,6 @@ class SQLiteUser(BaseUser):
             conn.close()
 
     def validate_password(self, password:str):
-        print(hash_password(password))
         if not verify_password(password, self.password_hash):
             raise InvalidPasswordError()
 
