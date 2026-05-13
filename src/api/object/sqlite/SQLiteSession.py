@@ -1,7 +1,9 @@
 from api.db.sqlite import connection
 from api.object.base.BaseSession import BaseSession
 from api.object.sqlite.SQLiteUser import SQLiteUser
-from api.object.base.errors import SessionNotFound
+from api.object.base.errors import InvalidSessionError
+import secrets
+from api.util.dateutil import *
 
 
 
@@ -25,7 +27,7 @@ class SQLiteSession(BaseSession):
 
             row = cur.fetchone()
 
-            if row is None : raise SessionNotFound()
+            if row is None : raise InvalidSessionError()
 
             user_id = row[0]
             self.created_utc = row[1]
@@ -36,3 +38,37 @@ class SQLiteSession(BaseSession):
 
         finally:
             conn.close()
+
+    @staticmethod
+    def create(user: SQLiteUser) -> BaseSession:
+        conn = connection()
+        try:
+            cur = conn.cursor()
+
+            token = 'ses_' + secrets.token_hex(32)
+
+            created = timestamp_now_utc()
+            expiry = timestamp_now_utc(h=24)  # 24 hour session
+
+            cur.execute(
+                """
+                INSERT INTO session (token, user_id, created_utc, expiry_utc)
+                VALUES (?, ?, ?, ?)
+                """,
+                (token, user.id, created, expiry)
+            )
+
+            conn.commit()
+
+            # return fully loaded session object
+            return SQLiteSession(token)
+
+        finally:
+            conn.close()
+
+    def validate_expiry(self) -> None:
+        """
+        Raise SessionExpiredError if current session exists but is expired.
+        """
+        if not self.created_utc <= timestamp_now_utc() <= self.expiry_utc:
+            raise InvalidSessionError()

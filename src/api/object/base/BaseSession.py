@@ -11,8 +11,19 @@ class BaseSession:
 
     def _load(self):
         raise NotImplementedError()
+    
+    def validate_expiry() -> None:
+        """
+        raise SessionExpiredError if current session is expired
+        :returns: Nothing. No exception is raised if session is valid.
+        """
+        raise NotImplementedError()
 
     @property
     def data(self) -> dict:
+        raise NotImplementedError()
+    
+    @staticmethod
+    def create(user:BaseUser):
         raise NotImplementedError()
     
