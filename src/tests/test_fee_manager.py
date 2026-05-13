@@ -40,7 +40,7 @@ TOP_TIER          = {'id': 5, 'range_min_cents': 10000001, 'range_max_cents': 99
     (1000000000, TOP_TIER,          FeeNotFoundError), # above top tier upper bound ($9,999,999.99)
 
 ])
-def test_SQLiteFeeManager_get_by_amount(AMOUNT_CENTS:int, EXPECTED_TIER:dict, EXPECTED_EXCEPTION:Exception|None):
+def test_SQLiteFeeManager_get_fee_tier_by_amount(AMOUNT_CENTS:int, EXPECTED_TIER:dict, EXPECTED_EXCEPTION:Exception|None):
     """
     This te
     """
