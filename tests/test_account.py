@@ -28,13 +28,3 @@ def test_list_accounts_invalid_token():
     URL = BASE_URL + '/api/v1/account/list/'
     r = requests.get(url=URL, headers={'Authorization': 'ses_invalid_token'})
     assert r.status_code == 404, f"Server returned non-404 (Not Found) response code for valid request."
-
-
-
-def main():
-    test_get_account_list()
-    test_get_account_transfers()
-    test_get_account_transfers_non_owned()
-
-if __name__ == '__main__':
-    main()
