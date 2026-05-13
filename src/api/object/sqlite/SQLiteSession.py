@@ -1,8 +1,8 @@
+import random
 from api.db.sqlite import connection
 from api.object.base.BaseSession import BaseSession
 from api.object.sqlite.SQLiteUser import SQLiteUser
 from api.object.base.errors import InvalidSessionError
-import secrets
 from api.util.dateutil import *
 
 
@@ -45,7 +45,7 @@ class SQLiteSession(BaseSession):
         try:
             cur = conn.cursor()
 
-            token = 'ses_' + secrets.token_hex(32)
+            token = 'ses_' + ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', k=64))
 
             created = timestamp_now_utc()
             expiry = timestamp_now_utc(h=24)  # 24 hour session
