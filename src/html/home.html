@@ -2,6 +2,7 @@
 <head>
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
     <link href='stylesheet.css' rel='stylesheet'>
+    <link href='table_stylesheet.css' rel='stylesheet'>
 </head>
 <body style="display: flex; flex-direction: column; flex-grow: 1;">
     <div class="header spaced-container">
@@ -12,11 +13,30 @@
         </div>
         <div class="header right-container">
             <p class="header-text", style="padding-right: 2px; overflow: hidden;">Hello, </p>
-            <a class="header-text underline", style="padding-right: 10px;" href="account.html">Mitch!</a>
-            <a href="account.html"><img class="user-avatar" src="https://avatars.githubusercontent.com/u/67477144?v=4", height="64", width="64"></a>
+            <a class="header-text underline", style="padding-right: 10px;" href="profile.html">Mitch!</a>
+            <a href="profile.html"><img class="user-avatar" src="https://avatars.githubusercontent.com/u/67477144?v=4", height="64", width="64"></a>
         </div>
     </div>
-    <div class="content"></div>
+    <div class="content">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Account Name</th>
+                <th>Account Balance</th>
+            </tr>
+            <tr class="data-row">
+                <td>1</td>
+                <td>Spending</td>
+                <td>$123.45</td>
+            </tr>
+            <tr class="data-row">
+                <td>2</td>
+                <td>Savings</td>
+                <td>$738.24</td>
+            </tr>
+        </table>
+    </div>
+
     <div class="footer">
         <div style="display: flex; flex-direction: row; align-items: center; padding-left: 10px;">
             <p class="beacon"></p>
@@ -53,6 +73,15 @@ websocket.addEventListener('message', (e) => {
         }
     } 
 })
+
+window.addEventListener('beforeunload', (event) => {
+    if (websocket) {
+        websocket.send({"type": "client_disconnect", "data": []})
+        websocket.close();
+    }
+    // Chrome requires returnValue to be set to an empty string
+    event.returnValue = ''; 
+});
 
 function handleButtonPress(element) {
     console.log(element.href);

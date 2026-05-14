@@ -1,0 +1,27 @@
+table {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 25px;
+    border-collapse: collapse;
+}
+
+
+td:first-child, td:last-child {
+    text-align: center;
+}
+
+td, th {
+    padding: 20px 0;
+}
+
+tr {
+    border: 1px solid red;
+    border-radius: 5px;
+}
+
+tr::ch
+
+.data-row {
+    background-color: rgb(255, 171, 135);
+}
+

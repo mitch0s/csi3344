@@ -1,7 +1,7 @@
 import requests
 
 BASE_URL = 'http://127.0.0.1:8000'
-SESSION_HEADER = 'Bearer ses_12204e901e061f1421834b7bf57b027b56a6870641ea29230eafc11f3aed9f5e'
+SESSION_HEADER = 'Bearer ses_iCMFXreWQ0BlLTxXmmWXWJMIHQIJMtG1R5qg1fnK8RcsE9fBTuYOywlb2xVx8PNZ'
 
 
 def test_get_account_list():
