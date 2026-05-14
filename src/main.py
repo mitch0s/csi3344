@@ -1,49 +1,81 @@
 import asyncio
-from fastapi import FastAPI, Request
-from fastapi import WebSocket, WebSocketDisconnect
-from contextlib import asynccontextmanager
-import api.endpoint.v1.user
-import api.endpoint.v1.account
-import api.endpoint.v1.session
-from api.util.dateutil import timestamp_now_utc
 import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, APIRouter, Request, WebSocket
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+import api.endpoint.v1.user as user_api
+import api.endpoint.v1.account as account_api
+import api.endpoint.v1.session as session_api
+
+from api.util.dateutil import timestamp_now_utc
 from taskgroup import TaskGroup
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
-active_websocket_clients = set()
+# ----------------------------
+# App setup
+# ----------------------------
+
+api_router = APIRouter(prefix="/api/v1")
+active_websocket_clients: set[WebSocket] = set()
+
 
 @asynccontextmanager
-async def lifespan(app:FastAPI):
-    # startup stuff
-    logger.info('Starting up...')
+async def lifespan(app: FastAPI):
+    logger.info("Starting up...")
+
     yield
-    logger.info('Disconnecting websocket clients...')
-    ws_client:WebSocket
-    for ws_client in active_websocket_clients:
-        ws_client.close(1000)
+
+    logger.info("Shutting down WebSocket clients...")
+
+    for ws in list(active_websocket_clients):
+        try:
+            await ws.close(code=1000)
+        except Exception:
+            pass
+
+    active_websocket_clients.clear()
 
 
-app = FastAPI(lifespan=lifespan)    
+app = FastAPI(lifespan=lifespan)
 
-@app.post('/api/v1/user/session/')
-async def v1_post_user_session(request:Request): 
-    return await api.endpoint.v1.session.create(request)
 
-# list of API endpoints and their handlers
-@app.get('/api/v1/user/')
-async def v1_get_user(request:Request): 
-    return await api.endpoint.v1.user.get(request)
+@app.get("/{file}/")
+async def get_file(request:Request, file:str):
+    if '.' not in file:
+        file += '.html'
+    
+    return FileResponse(f'src/static/{file}')
 
-# list of API endpoints and their handlers
-@app.get('/api/v1/account/list/')
-async def v1_get_account_list(request:Request): 
-    return await api.endpoint.v1.account.list(request)
 
-# list transfers for this account
-@app.get('/api/v1/account/{id}/transfers/')
-async def v1_get_account_list(request:Request, id:int): 
-    return await api.endpoint.v1.account.list_transactions(request, id)
+# ----------------------------
+# API routes
+# ----------------------------
+
+@api_router.post("/user/session/")
+async def create_session(request: Request):
+    return await session_api.create(request)
+
+
+@api_router.get("/user/")
+async def get_user(request: Request):
+    return await user_api.get(request)
+
+
+@api_router.get("/account/list/")
+async def list_accounts(request: Request):
+    return await account_api.list(request)
+
+
+@api_router.get("/account/{account_id}/transfers/")
+async def list_account_transfers(request: Request, account_id: int):
+    return await account_api.list_transactions(request, account_id)
+
+
+app.include_router(api_router)
 
 
 async def broadcast_new_user_count():
