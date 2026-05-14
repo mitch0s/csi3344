@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/{file}/")
+@app.get("/{file}")
 async def get_file(request:Request, file:str):
     if '.' not in file:
         file += '.html'
