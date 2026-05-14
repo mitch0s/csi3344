@@ -3,8 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, APIRouter, Request, WebSocket
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 import api.endpoint.v1.user as user_api
 import api.endpoint.v1.account as account_api
@@ -15,9 +14,6 @@ from taskgroup import TaskGroup
 
 logger = logging.getLogger(__name__)
 
-# ----------------------------
-# App setup
-# ----------------------------
 
 api_router = APIRouter(prefix="/api/v1")
 active_websocket_clients: set[WebSocket] = set()
@@ -43,6 +39,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+@app.get("/")
+async def redirect():
+    return RedirectResponse('/home')
+
 @app.get("/{file}")
 async def get_file(request:Request, file:str):
     if '.' not in file:
@@ -50,10 +50,6 @@ async def get_file(request:Request, file:str):
     
     return FileResponse(f'src/static/{file}')
 
-
-# ----------------------------
-# API routes
-# ----------------------------
 
 @api_router.post("/user/session/")
 async def create_session(request: Request):
