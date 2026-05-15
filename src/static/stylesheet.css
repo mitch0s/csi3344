@@ -3,6 +3,10 @@
     --light-colour: rgb(255, 224, 167);
 }
 
+[v-cloak] {
+    display: none;
+}
+
 body {
     font-family: 'Montserrat';
     margin: 10;
@@ -73,6 +77,7 @@ body {
     height: 75%;
     width: auto;
     aspect-ratio: 1 / 1;
+    max-height: 40px;
     display: block;
     border-radius: 200px;
     box-sizing: border-box;
