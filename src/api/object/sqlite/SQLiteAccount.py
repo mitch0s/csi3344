@@ -35,8 +35,7 @@ class SQLiteAccount(BaseAccount):
             # compute balance in same query
             cur.execute(
                 """
-                SELECT
-                    COALESCE(SUM(
+                SELECT COALESCE(SUM(
                         CASE
                             WHEN cr_account_id = ? THEN amount_cents
                             WHEN dr_account_id = ? THEN -amount_cents

@@ -8,7 +8,7 @@
         <div class="header left-container" style="padding-left: 25px; gap: 20px;">
             <a class="header-text" href="/home">Home</a>
             <a class="header-text" href="/accounts">Accounts</a>
-            <a class="header-text" onclick="handleButtonPress(this)">Example</a>
+            <a class="header-text" onclick="await getAccountList()">Example</a>
         </div>
         <div class="header right-container">
             <p class="header-text", style="padding-right: 2px; overflow: hidden;">Hello, </p>
@@ -56,6 +56,17 @@ websocket.addEventListener('message', (e) => {
 
 function handleButtonPress(element) {
     console.log(element.href);
-    window.location = "https://neutron.au/";
 }
+
+async function getAccountList() {
+    const response = await fetch("/api/v1/account/list/", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer: ses_iCMFXreWQ0BlLTxXmmWXWJMIHQIJMtG1R5qg1fnK8RcsE9fBTuYOywlb2xVx8PNZ"
+        }
+    });
+    console.log(await response.json());
+}
+
 </script>

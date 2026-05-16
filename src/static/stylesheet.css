@@ -1,11 +1,83 @@
 :root {
     --dark-colour: rgb(255, 166, 0);
     --light-colour: rgb(255, 224, 167);
+    --error-red: rgb(255, 58, 36);
+    --success-green:rgb(31, 154, 0);
 }
+
 
 [v-cloak] {
     display: none;
 }
+
+div.user-area {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dark-colour);
+    border-radius: 5px;
+    box-sizing: border-box;
+    border: var(--dark-colour) solid 10px;
+    margin: auto;
+    max-width: 550px;
+}
+
+.user-area {
+    /* display: flex; */
+    flex-direction: column;
+    max-width: 350px;
+    width: auto;
+    padding: 25px;
+    margin: auto;
+}
+
+.error {
+    color: var(--error-red);
+}
+
+.success {
+    color: var(--success-green);
+}
+
+.field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.field label {
+    flex-grow: 0;
+    width: 100px;
+    flex-shrink: 0;
+    color: white;
+}
+
+.field input {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    background-color: white;
+    border: var(--light-colour) solid 3px;
+    border-radius: 5px;
+    height: 25px;
+    padding-left: 10px;
+}
+
+.field button {
+    background-color: transparent;
+    border: solid white 2px;
+    border-radius: 5px;
+    height: 25px;
+    width: 100px;
+    color: white;
+    cursor: pointer;
+    margin-top: 5px;
+    margin-left: auto;
+}
+
+
+
+
 
 body {
     font-family: 'Montserrat';
@@ -15,6 +87,7 @@ body {
     background-color: var(--dark-colour);
 }
 
+
 .beacon {
     background-color: red;
     border-radius: 50%;
@@ -22,6 +95,7 @@ body {
     height: 10px;
     animation: shine 2s ease-in-out infinite;
 }
+
 
 @keyframes shine {
     0%, 20% {
@@ -32,10 +106,12 @@ body {
     }
   }
 
+
 .underline {
     text-decoration: underline;
     text-decoration-color: white;
 }
+
 
 .spaced-container {
     display: flex;
@@ -44,6 +120,7 @@ body {
     padding-right: 10px;
 }
 
+
 .left-container {
     display: flex;
     justify-content: left;
@@ -51,6 +128,7 @@ body {
     padding-left: 10px;
     height: 100%;
 }
+
 
 .right-container {
     display: flex;
@@ -63,15 +141,34 @@ body {
 
 .header {
     max-height: 70px;
-    min-height: 35;
+    min-height: 50px;
     height: 100%;
     background-color: var(--dark-colour);
     border-radius: 10px;
 }
 
+
 .header-text {
     color: white;
 }
+
+.header-text.small {
+    color: white;
+    font-size: 16px;
+    
+}
+
+.header-text.medium {
+    color: white;
+    font-size: 20px;
+}
+
+.header-text.large {
+    color: white;
+    font-size: 24px;
+}
+
+
 
 .user-avatar { 
     height: 75%;
@@ -98,4 +195,14 @@ body {
     min-height: 100px;
     background-color: var(--dark-colour);
     border-radius: 10px;
+}
+
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    min-width: 100px;
+    min-height: 200px;
+    margin: auto;
 }

@@ -12,7 +12,7 @@ class BadRequestResponse(JSONResponse):
     def __init__(self, message:str, headers=None, media_type=None, background=None):
         # wrap content in success status message with timestamp. All data under 'data' field.
         content = {'status': 'error', 'reason': message, 'timestamp': timestamp_now_utc(), 'data': None}
-        super().__init__(content, 401, headers, media_type, background)
+        super().__init__(content, 400, headers, media_type, background)
 
 class NotFoundResponse(JSONResponse):
     def __init__(self, message:str, headers=None, media_type=None, background=None):

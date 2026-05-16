@@ -1,61 +1,85 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
-    <link href='/stylesheet.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_outward" />
+    <link rel="stylesheet" href="/stylesheet.css">
+
+    <script type="module">
+        import { createApp, onMounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+        createApp({
+            data() {
+                return {
+                    email_address: "",
+                    password: "",
+                    status_message: "",
+                    statusIsError: false
+                }
+            },
+
+            methods: {
+                async requestLogin() {
+                    const response = await fetch("/api/v1/user/session/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({"email_address": this.email_address, "password": this.password})
+                    });
+                    const body = await response.json();
+                    console.log(body);
+                    if (response.status == 200) {
+                        this.statusIsError = false;
+                        document.cookie = body.data.session_token;
+                        this.status_message = "Login success. Redirecting."
+                        setTimeout(() => { window.location = '/home';  }, 1000)
+                    }
+                    else {
+                        this.statusIsError = true;
+                        this.status_message = body.reason;
+                    }
+                }
+            },
+        },
+    ).mount('#app');
+    </script>
 </head>
-<body style="display: flex; flex-direction: column; flex-grow: 1;">
+
+<body id="app" v-cloak style="display: flex; flex-direction: column; flex-grow: 1;">
+
     <div class="header spaced-container">
-        <div class="header left-container" style="padding-left: 25px; gap: 20px;">
-            <a class="header-text" href="/home">Home</a>
-            <a class="header-text" href="/accounts">Accounts</a>
-            <a class="header-text" onclick="handleButtonPress(this)">Example</a>
-        </div>
-        <div class="header right-container">
-            <p class="header-text", style="padding-right: 2px; overflow: hidden;">Hello, </p>
-            <a class="header-text underline", style="padding-right: 10px;" href="/profile">Mitch!</a>
-            <a href="/profile"><img class="user-avatar" src="https://avatars.githubusercontent.com/u/67477144?v=4", height="64", width="64"></a>
+        <div class="header left-container" style="padding-left: 25px; gap: 20px; min-height: 50px;">
+            <strong><a class="header-text large" >Mitchwealth Bank Australia</a></strong>
         </div>
     </div>
-    <div class="content"></div>
+
+    <div class="content" style="align-content: center;">
+        <div class="user-area">
+            <a class="header-text large" style="margin-bottom: 25px;">Register</a>
+            <div class="field">
+                <label for="first_name">First Name:</label>
+                <input id="first_name" v-model="first_name">
+            </div>
+            <div class="field">
+                <label for="last_name">Last Name:</label>
+                <input id="last_name" v-model="last_name">
+            </div>
+            <div class="field">
+                <label for="email_address">Email:</label>
+                <input id="email_address" v-model="email_address">
+            </div>
+            <div class="field">
+                <label for="password">Password:</label>
+                <input id="password" v-model="password" style="flex-grow: 1;">
+            </div>
+            <div class="field"><button @click="requestLogin"><strong>Login</strong></button></div>
+        <strong><a :class="{ success: !statusIsError, error: statusIsError }">{{ status_message }}</a></strong>
+        </div>
+    </div>
+
     <div class="footer">
-        <div style="display: flex; flex-direction: row; align-items: center; padding-left: 10px;">
-            <p class="beacon"></p>
-            <p id="live-user-count" class="header-text", style="padding-left: 10px;">Live Users: -</p>
-        </div>
     </div>
+
 </body>
 </html>
-
-<script>
-// constants
-const websocket_url = "ws://127.0.0.1:8000/ws";
-const websocket = new WebSocket(websocket_url);
-
-websocket.addEventListener('open', () => {
-    console.log('Websocket connected: ' + websocket_url);
-})
-
-websocket.addEventListener('message', (e) => {
-    const event = JSON.parse(e.data);
-    const data = event.data;
-    switch (event.type) {
-        case 'new_message': {
-            for (let message of data) {
-                console.log(`WS_MESSAGE: ${message.content}`);
-            }
-            break;
-        }
-        case 'live_user_count': {
-            for (let message of data) {
-                document.getElementById('live-user-count').innerText = "Live Users: " + message.value;
-                break
-            }
-        }
-    } 
-})
-
-function handleButtonPress(element) {
-    console.log(element.href);
-    window.location = "https://neutron.au/";
-}
-</script>

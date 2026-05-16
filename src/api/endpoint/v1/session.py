@@ -2,7 +2,8 @@ from fastapi import Request
 from api.object.sqlite import SQLiteSession, SQLiteUser
 from api.object.base.errors import *
 from api.response.json_response import *
-
+from json import JSONDecodeError
+from api.util.hashing import hash_password
 
 async def create(request: Request):
     try:
@@ -26,4 +27,5 @@ async def create(request: Request):
 
     except UserNotFoundError           : return NotFoundResponse('invalid credentials.')
     except InvalidPasswordError        : return NotFoundResponse('invalid credentials.')
+    except JSONDecodeError as e        : return BadRequestResponse('invalid request body.')
     except RequestValidationError as e : return BadRequestResponse(str(e))

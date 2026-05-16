@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/table_stylesheet.css">
 
     <script type="module">
-        import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+        import { createApp, onMounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
         createApp({
             data() {
@@ -17,18 +17,7 @@
 
                     live_user_count: "-",
 
-                    accounts: [
-                        {
-                            id: 1,
-                            name: "Spending",
-                            balance: 123.45
-                        },
-                        {
-                            id: 2,
-                            name: "Savings",
-                            balance: 738.24
-                        }
-                    ]
+                    accounts: []
                 }
             },
 
@@ -36,10 +25,6 @@
                 handleAccountNavigate(account) {
                     console.log(account.id);
                     window.location = '/account/' + account.id;
-                },
-
-                handleButtonPress() {
-                    window.location = "https://neutron.au/";
                 },
 
                 connectWebsocket() {
@@ -83,23 +68,43 @@
 
                         event.returnValue = '';
                     });
+                },
+
+                async getAccountList() {
+                    const response = await fetch("/api/v1/account/list/", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer ses_iCMFXreWQ0BlLTxXmmWXWJMIHQIJMtG1R5qg1fnK8RcsE9fBTuYOywlb2xVx8PNZ"
+                        }
+                    });
+                    const body = await response.json();
+                    console.log(body);
+                    if (response.status != 200) { return; }
+                    this.accounts = [];
+                    for (var account of body.data) {
+                        const t_account = {id: account.id, name: account.name, balance: account.balance_cents/100};
+                        console.log(t_account); 
+                        this.accounts.push(t_account);
+                    }
                 }
             },
 
             mounted() {
                 this.connectWebsocket();
+                this.getAccountList();
             }
         }).mount('#app');
     </script>
 </head>
 
-<body id="app" style="display: flex; flex-direction: column; flex-grow: 1;">
+<body id="app" v-cloak style="display: flex; flex-direction: column; flex-grow: 1;">
 
     <div class="header spaced-container">
         <div class="header left-container" style="padding-left: 25px; gap: 20px;">
-            <a class="header-text" href="/home">Home</a>
-            <a class="header-text" href="/accounts">Accounts</a>
-            <a class="header-text" @click="handleButtonPress">Transfer</a>
+            <a class="header-text medium" href="/home">Home</a>
+            <a class="header-text medium" href="/accounts">Accounts</a>
+            <a class="header-text medium" href="/transfer">Transfer</a>
         </div>
 
         <div class="header right-container">
@@ -126,21 +131,14 @@
                 <th></th>
             </tr>
 
-            <tr
-                v-for="account in accounts"
-                :key="account.id"
-                :id="account.id"
-                class="data-row"
-            >
+            <tr v-for="account in accounts" :key="account.id" :id="account.id" class="data-row">
                 <td>{{ account.id }}</td>
                 <td>{{ account.name }}</td>
                 <td>${{ account.balance.toFixed(2) }}</td>
 
                 <td>
                     <a @click="handleAccountNavigate(account)">
-                        <span class="material-symbols-outlined">
-                            arrow_outward
-                        </span>
+                        <span class="material-symbols-outlined">arrow_outward</span>
                     </a>
                 </td>
             </tr>
@@ -150,13 +148,7 @@
     <div class="footer">
         <div style="display: flex; flex-direction: row; align-items: center; padding-left: 10px;">
             <p class="beacon"></p>
-
-            <p
-                class="header-text"
-                style="padding-left: 10px;"
-            >
-                Live Users: {{ live_user_count }}
-            </p>
+            <p class="header-text" style="padding-left: 10px;">Live Users: {{ live_user_count }}</p>
         </div>
     </div>
 

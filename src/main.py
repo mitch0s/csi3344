@@ -15,7 +15,6 @@ from taskgroup import TaskGroup
 logger = logging.getLogger(__name__)
 
 
-api_router = APIRouter(prefix="/api/v1")
 active_websocket_clients: set[WebSocket] = set()
 
 
@@ -51,27 +50,24 @@ async def get_file(request:Request, file:str):
     return FileResponse(f'src/static/{file}')
 
 
-@api_router.post("/user/session/")
+@app.post("/api/v1/user/session/")
 async def create_session(request: Request):
     return await session_api.create(request)
 
 
-@api_router.get("/user/")
+@app.get("/api/v1/user/")
 async def get_user(request: Request):
     return await user_api.get(request)
 
 
-@api_router.get("/account/list/")
+@app.get("/api/v1/account/list/")
 async def list_accounts(request: Request):
     return await account_api.list(request)
 
 
-@api_router.get("/account/{account_id}/transfers/")
+@app.get("/api/v1/account/{account_id}/transfers/")
 async def list_account_transfers(request: Request, account_id: int):
     return await account_api.list_transactions(request, account_id)
-
-
-app.include_router(api_router)
 
 
 async def broadcast_new_user_count():

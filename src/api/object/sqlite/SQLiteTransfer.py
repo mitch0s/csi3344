@@ -37,9 +37,9 @@ class SQLiteTransfer(BaseTransfer):
 
     @property
     def items(self):
-        # cache result (avoid repeated db hits)
-        if self._items is not None:
-            return self._items
+        # # cache result (avoid repeated db hits)
+        # if self._items is not None:
+        #     return self._items
 
         conn = connection()
         try:
@@ -47,13 +47,7 @@ class SQLiteTransfer(BaseTransfer):
 
             cur.execute(
                 """
-                SELECT
-                    id,
-                    transaction_id,
-                    cr_account_id,
-                    dr_account_id,
-                    amount_cents,
-                    type
+                SELECT id, transaction_id, cr_account_id, dr_account_id, amount_cents, type
                 FROM transfer_item
                 WHERE transaction_id = ?
                 """,
