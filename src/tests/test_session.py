@@ -8,7 +8,7 @@ def test_create_session_valid_base_case():
     r = requests.post(
         url=URL, 
         headers={}, 
-        json={'email_address': 'mitch@neutron.au', 'password': 'test123123'}
+        json={'email_address': 'mitch@neutron.au', 'password': 'test123'}
     )
     assert r.status_code == 200, f"Endpoint failed to create session:{r.json().get('reason')}"
 
@@ -17,7 +17,7 @@ def test_create_session_create_invalid_email():
     r = requests.post(
         url=URL, 
         headers={}, 
-        json={'email_address': 'mitch@commonsystems.com.au', 'password': 'test123123'}
+        json={'email_address': 'mitch@commonsystems.com.au', 'password': 'test123'}
     )
     assert r.status_code != 200, "Endpoint created session despite supply of invalid account email address."
 

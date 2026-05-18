@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import random
+import traceback
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, WebSocket
@@ -10,6 +11,9 @@ from api.websocket.websocket import SessionWebSocket, active_websocket_sessions
 import api.endpoint.v1.user as user_api
 import api.endpoint.v1.account as account_api
 import api.endpoint.v1.session as session_api
+import api.endpoint.v1.transfer as transfer_api
+
+from api.object.sqlite import SQLiteFeeManager
 
 from api.util.dateutil import timestamp_now_utc
 from taskgroup import TaskGroup
@@ -37,6 +41,7 @@ async def lifespan(app:FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+# static content retrieval.
 @app.get("/")
 async def redirect():
     return RedirectResponse('/home')
@@ -58,20 +63,21 @@ async def get_file(request:Request, entity:str, id:int):
 async def create_session(request: Request):
     return await session_api.create(request)
 
-
 @app.get("/api/v1/user/")
 async def get_user(request: Request):
     return await user_api.get(request)
-
 
 @app.get("/api/v1/account/list/")
 async def list_accounts(request: Request):
     return await account_api.list(request)
 
-
 @app.get("/api/v1/account/{account_id}/transfers/")
-async def list_account_transfers(request: Request, account_id: int):
+async def list_account_transfers(request:Request, account_id: int):
     return await account_api.list_transactions(request, account_id)
+
+@app.post("/api/v1/transfer/")
+async def list_account_transfers(request:Request):
+    return await transfer_api.create(request)
 
 
 async def broadcast_new_user_count():
@@ -102,17 +108,10 @@ async def websocket_endpoint(og_websocket:WebSocket):
     await broadcast_new_user_count()
 
     async def ws_write_task(websocket:SessionWebSocket):
-        counter = 0
-        await asyncio.sleep(1)
         if websocket.user:
-            for i in range(5):
-                data = await account_created_data(id=1000+i)
-                await websocket.emit('account_created', data)
             while True:
-                await asyncio.sleep(0.2)
-                data = []
-                for i in range(5) : data.append(await account_updated_data(id=1000+i))
-                await websocket.emit('account_updated', data)
+                await asyncio.sleep(1)
+                pass
 
     async def ws_read_task(websocket:SessionWebSocket):
         while True:
@@ -122,12 +121,20 @@ async def websocket_endpoint(og_websocket:WebSocket):
                     token = message.get('data', [{}])[0].get('session_token')
                     if token:
                         websocket.set_session(token)    
-
+                case 'transfer_fee':
+                    if websocket.user:
+                        print('valid user!')
+                        transfer_amount_cents = message.get('data', {}).get('transfer_amount_cents')
+                        fee_amount_cents = SQLiteFeeManager().calculate_fee_charge_cents(transfer_amount_cents)
+                        data = { 'transfer_amount_cents': transfer_amount_cents, 'fee_amount_cents': fee_amount_cents }
+                        await websocket.emit('transfer_fee', data)
+                        
     try:
         async with TaskGroup() as tg:
             tg.create_task(ws_write_task(websocket))
             tg.create_task(ws_read_task(websocket))
     except Exception as error:
+        traceback.print_exc()
         active_websocket_sessions.remove(websocket)
         await broadcast_new_user_count()
         logger.info(error)

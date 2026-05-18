@@ -9,7 +9,8 @@ class BaseAccount:
         self.name:str
         self.created_utc:str
         self.status:str
-        self.balance_cents:int
+        self.balance_cents:int = 0
+        self.available_balance_cents:int = 0
         # call 'private' load method
         self._load()
 

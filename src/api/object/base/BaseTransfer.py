@@ -1,3 +1,5 @@
+from api.object.base import BaseAccount
+
 
 class BaseTransfer:
     def __init__(self, id:int):
@@ -31,5 +33,9 @@ class BaseTransfer:
     
     @property
     def data(self) -> dict:
+        raise NotImplementedError()
+    
+    @staticmethod
+    def create(sender:BaseAccount, reciever:BaseAccount, amount_cents:int, user_node:str=""):
         raise NotImplementedError()
 

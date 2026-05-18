@@ -1,6 +1,6 @@
 from .SQLiteAccount import SQLiteAccount
 from api.object.base import BaseUser, BaseAccount
-from api.object.base.errors import UserNotFoundError, InvalidPasswordError
+from api.object.base.errors import UserNotFoundError, InvalidPasswordError, AccountNotFoundError
 from api.db.sqlite import connection
 from api.util.hashing import *
 
@@ -54,6 +54,12 @@ class SQLiteUser(BaseUser):
     def validate_password(self, password:str):
         if not verify_password(password, self.password_hash):
             raise InvalidPasswordError()
+        
+    def get_account(self, id:int) -> BaseAccount:
+        for account in self.accounts:
+            if account.id == id:
+                return account
+        raise AccountNotFoundError(f'User does not own an account with id: {id}')
 
     @property
     def accounts(self) -> list[BaseAccount]:

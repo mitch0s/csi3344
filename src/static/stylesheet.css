@@ -45,8 +45,14 @@ div.user-area {
     margin-bottom: 10px;
 }
 
+.field .value {
+    margin-left: auto;
+    text-align: right;
+    min-width: 100px;
+}
+
 .field label {
-    flex-grow: 0;
+    flex-grow: 1;
     width: 100px;
     flex-shrink: 0;
     color: white;
@@ -55,12 +61,27 @@ div.user-area {
 .field input {
     flex: 1;
     width: 100%;
-    min-width: 0;
+    min-width: 212px;
     background-color: white;
     border: var(--light-colour) solid 3px;
     border-radius: 5px;
     height: 25px;
     padding-left: 10px;
+}
+
+.field select {
+    flex: 1;
+    width: 100%;
+    min-width: 230px;
+    background-color: white;
+    border: var(--light-colour) solid 3px;
+    border-radius: 5px;
+    height: 33px;
+    padding-left: 10px;
+}
+
+.field option {
+    color: black;
 }
 
 .field button {
@@ -75,7 +96,29 @@ div.user-area {
     margin-left: auto;
 }
 
+.field option {
+    color: black;
+    background-color: transparent;
+    border: solid white 2px;
+    border-radius: 5px;
+    height: 25px;
+    width: 100px;
+    color: white;
+    cursor: pointer;
+    margin-top: 5px;
+    margin-left: auto;
+}
 
+
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid white;
+    margin: 1em 0;
+    padding: 0;
+}
 
 
 

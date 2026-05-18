@@ -42,11 +42,23 @@ class BaseFeeManager:
         """
         Iterate over all fee tiers and determine
         """
+        min_fee_tier:FeeTier = None
+        max_fee_tier:FeeTier = None
+
         for tier in self.tiers:
             # start/stop range values are inclusive at both ends!!!!!!
             if tier.range_min_cents <= amount_cents <= tier.range_max_cents:
                 return tier
-        raise FeeNotFoundError(f'could not find a fee tier for amount {amount_cents}')
+            if max_fee_tier == None or tier.transfer_cap_cents > max_fee_tier.transfer_cap_cents:
+                max_fee_tier = tier
+            if min_fee_tier == None or tier.range_min_cents > min_fee_tier.range_min_cents:
+                min_fee_tier = tier
+        
+        if amount_cents < min_fee_tier.range_min_cents:
+            raise FeeNotFoundError()
+        
+        # return max tier when no matching one found
+        return tier
     
 
     def calculate_fee_charge_cents(self, amount_cents:int) -> int:
@@ -55,9 +67,9 @@ class BaseFeeManager:
         This biases towards the bank, and prevents fee undercalculation.
         """
         fee_tier:FeeTier = self.get_transfer_amount_tier(amount_cents=amount_cents)
-        fee_amount_cents = amount_cents * fee_tier.fee_percentage
+        fee_amount_cents = amount_cents * (fee_tier.fee_percentage / 100)
         fee_amount_cents = int(math.ceil(fee_amount_cents))  # round sub-cent amounts up to nearest cent. bias is for bank, against customer.
         fee_amount_cents = min(fee_amount_cents, fee_tier.transfer_cap_cents)  # use lowest fee amount (calculated fee vs. tier cap)
-        
+        print(f'amount={amount_cents/100}, fee={fee_amount_cents/100}')
         return fee_amount_cents
 

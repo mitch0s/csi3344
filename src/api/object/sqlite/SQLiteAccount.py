@@ -1,6 +1,7 @@
 from api.object.base import BaseAccount
 from api.object.sqlite.SQLiteTransfer import SQLiteTransfer
 from api.db.sqlite import connection
+from api.object.base.errors import *
 
 
 class SQLiteAccount(BaseAccount):
@@ -11,7 +12,6 @@ class SQLiteAccount(BaseAccount):
         conn = connection()
         try:
             cur = conn.cursor()
-
             cur.execute(
                 """
                 SELECT id, user_id, name, created_utc, status
@@ -24,7 +24,7 @@ class SQLiteAccount(BaseAccount):
             row = cur.fetchone()
 
             if row is None:
-                raise Exception("account not found")
+                raise AccountNotFoundError("account not found")
 
             self.id = row[0]
             self.user_id = row[1]
@@ -36,14 +36,16 @@ class SQLiteAccount(BaseAccount):
             cur.execute(
                 """
                 SELECT COALESCE(SUM(
-                        CASE
-                            WHEN cr_account_id = ? THEN amount_cents
-                            WHEN dr_account_id = ? THEN -amount_cents
-                            ELSE 0
-                        END
-                    ), 0)
-                FROM transfer_item
-                WHERE cr_account_id = ? OR dr_account_id = ?
+                    CASE
+                        WHEN ti.cr_account_id = ? THEN ti.amount_cents
+                        WHEN ti.dr_account_id = ? THEN -ti.amount_cents
+                        ELSE 0
+                    END
+                ), 0)
+                FROM transfer_item ti
+                JOIN transfer t ON t.id = ti.transaction_id
+                WHERE (ti.cr_account_id = ? OR ti.dr_account_id = ?)
+                AND t.status = 'processed'
                 """,
                 (self.id, self.id, self.id, self.id)
             )

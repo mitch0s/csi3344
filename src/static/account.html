@@ -64,7 +64,6 @@
 
                             this.websocket.close();
                         }
-
                         event.returnValue = '';
                     });
                 },
@@ -74,7 +73,7 @@
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
-                            "Authorization": "Bearer ses_iCMFXreWQ0BlLTxXmmWXWJMIHQIJMtG1R5qg1fnK8RcsE9fBTuYOywlb2xVx8PNZ"
+                            "Authorization": "Bearer " + document.cookie
                         }
                     });
                     const body = await response.json();

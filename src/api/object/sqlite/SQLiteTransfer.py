@@ -1,5 +1,6 @@
 from api.db.sqlite import connection
-from api.object.base import BaseTransfer
+from api.object.base import BaseTransfer, BaseAccount
+from api.util.dateutil import timestamp_now_utc
 
 
 class SQLiteTransfer(BaseTransfer):
@@ -92,7 +93,65 @@ class SQLiteTransfer(BaseTransfer):
     def data(self) -> dict:
         return {
             'id': self.id,
+            'status': self.status,
+            'created_utc': self.created_utc,
             'user_note': self.user_note,
             'amount_cents': self.amount_cents,
             'items': self.items
         }
+    
+    @staticmethod
+    def create(sender:BaseAccount, receiver:BaseAccount, amount_cents:int, fee_cents:int=0, user_note:str=''):
+        """
+        creates a transfer.
+
+        each transfer has:
+        - 1 user item (actual transfer between accounts)
+        - 1 fee item (sender -> system fees account)
+        """
+
+        conn = connection()
+        try:
+            cur = conn.cursor()
+            conn.execute("BEGIN")
+
+            # 1. Create transfer header
+            cur.execute(
+                """
+                INSERT INTO transfer (user_note, created_utc, status)
+                VALUES (?, ?, ?)
+                """,
+                (user_note, timestamp_now_utc(), "pending")
+            )
+
+            transfer_id = cur.lastrowid
+
+            # 2. user transfer item (actual money movement)
+            cur.execute(
+                """
+                INSERT INTO transfer_item (transaction_id, cr_account_id, dr_account_id, amount_cents, type)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (transfer_id, receiver.id, sender.id, amount_cents, "user")
+            )
+
+            # 3. fee transfer item (only if applicable)
+            if fee_cents > 0:
+                SYSTEM_FEE_ACCOUNT_ID = 0 
+                cur.execute(
+                    """
+                    INSERT INTO transfer_item (transaction_id, cr_account_id, dr_account_id, amount_cents, type)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (transfer_id, SYSTEM_FEE_ACCOUNT_ID, sender.id, fee_cents, "fees")
+                )
+
+            conn.commit()
+            return SQLiteTransfer(transfer_id)
+
+        except Exception:
+            conn.rollback()
+            raise
+
+        finally:
+            conn.close()

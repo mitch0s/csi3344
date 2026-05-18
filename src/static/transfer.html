@@ -14,17 +14,21 @@
                 return {
                     websocket_url: "ws://127.0.0.1:8000/ws",
                     websocket: null,
+
+                    user_account_id: null,
+                    recipient_account_id: null,
+                    transfer_amount_input: null,
+                    transfer_amount_cents: null,
+                    transfer_fee_cents: null,
+
                     live_user_count: "-",
+                    statusIsError: false,
+                    status_message: "",
                     accounts: []
                 }
             },
 
             methods: {
-                handleAccountNavigate(account) {
-                    console.log(account.id);
-                    window.location = '/account/' + account.id;
-                },
-
                 logout() {
                     document.cookie = "";
                     window.location = "/login";
@@ -34,7 +38,8 @@
                     this.websocket = new WebSocket(this.websocket_url);
 
                     this.websocket.addEventListener('open', () => {
-                        console.log('Websocket connected: ' + this.websocket_url);
+                        console.log('Websocket connected: ' + this.websocket_url)
+                        this.websocket.send(JSON.stringify({"type": "client_auth", "data": [{"session_token": document.cookie}]}))
                     });
 
                     this.websocket.addEventListener('message', (e) => {
@@ -42,13 +47,31 @@
                         const data = event.data;
 
                         switch (event.type) {
-                            case 'new_message': {
-                                for (let message of data) {
-                                    console.log(`WS_MESSAGE: ${message.content}`);
+                            case 'account_created': {
+                                for (let new_account of data) {
+                                    for (let existing_account of this.accounts) {
+                                        if (new_account.id == existing_account.id) { return; }
+                                    }
+                                    this.accounts.push({id: new_account.id, name: new_account.name, balance: new_account.balance_cents/100});
                                 }
                                 break;
                             }
-
+                            case 'account_updated': {
+                                for (let update of data) {
+                                    for (let existing_account of this.accounts) {
+                                        if (update.id == existing_account.id) { 
+                                            existing_account.name = update.name;
+                                            existing_account.balance = update.balance_cents / 100
+                                            break;
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                            case 'transfer_fee': {
+                                console.log(data);
+                                this.transfer_fee_cents = data[0].fee_amount_cents;
+                            }
                             case 'live_user_count': {
                                 for (let message of data) {
                                     this.live_user_count = message.value;
@@ -73,6 +96,19 @@
                     });
                 },
 
+                onAmountInput(e) {
+                    let v = Number(e.target.value.replace(/[^0-9]/g, '')) // digits only
+                    console.log(v);
+                    this.transfer_amount_cents = v;
+                    this.transfer_amount_input = (Number(v)/100).toFixed(2)
+                    this.websocket.send(JSON.stringify( {"type": "transfer_fee", "data": {"transfer_amount_cents": this.transfer_amount_cents }} ))
+                },
+
+                onRecipientAccountInput(e) {
+                    let v = e.target.value.replace(/[^0-9]/g, ''); // digits only
+                    this.recipient_account_id = v;
+                },
+
                 async getAccountList() {
                     const response = await fetch("/api/v1/account/list/", {
                         method: "GET",
@@ -90,7 +126,34 @@
                         console.log(t_account); 
                         this.accounts.push(t_account);
                     }
-                }
+                },
+   
+                async submitTransferRequest(e) {
+                    const response = await fetch("/api/v1/transfer/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + document.cookie
+                        },
+                        body: JSON.stringify({
+                            "user_account_id": Number(this.user_account_id),
+                            "recipient_account_id": Number(this.recipient_account_id),
+                            "transfer_amount_cents": Number(this.transfer_amount_cents)
+                        })
+                    });
+                    const body = await response.json();
+                    console.log(body);
+
+                    this.statusIsError = response.status != 200;
+                    this.status_message = body.reason;
+                    if (this.statusIsError == false) {
+                        setTimeout(() => {
+                            window.location('/accounts')
+                        }, 3000)
+                    }
+                    
+                },
+
             },
 
             mounted() {
@@ -105,6 +168,7 @@
 
     <div class="header spaced-container">
         <div class="header left-container" style="padding-left: 25px; gap: 20px;">
+            <strong><a class="header-text large" >Mitchwealth Bank Australia</a></strong>
             <a class="header-text medium" href="/home">Home</a>
             <a class="header-text medium" href="/accounts">Accounts</a>
             <a class="header-text medium" href="/transfer">Transfer</a>
@@ -119,7 +183,49 @@
         </div>
     </div>
 
-    <div class="content"> </div>
+    <div class="content" style="align-content: center;">
+        <div class="user-area" style="min-width: 500px;">
+            <a class="header-text large" style="margin-bottom: 25px;">Create Transfer</a>
+            <div class="field" title="Your account that will be used for the transfer.">
+                <label for="user_account_id">Select Account:</label>
+                <select id="user_account_id" v-model="user_account_id">
+                    <option v-for="account in accounts" :key="account.id" :value="account.id" style="color: black;">({{account.id}}) {{ account.name }} - ${{account.balance.toFixed(2)}}</option>
+                </select>
+            </div>
+            <div class="field" title="ID of the account receiving the payment.">
+                <label for="recipient_account_id">Recipient Account ID:</label>
+                <input id="recipient_account_id" v-model="recipient_account_id" inputmode="numeric" @input="onRecipientAccountInput">
+            </div>
+            <div class="field" title="ID of the account receiving the payment.">
+                <label for="transfer_amount_input">Amount:</label>
+                <span for="transfer_amount_input" style="color: white;">$</span>
+                <input id="transfer_amount_input" v-model="transfer_amount_input" inputmode="decimal" @input="onAmountInput">
+            </div>
+
+            <hr>
+
+            <div class="field" title="Amount being transferred to account" style="justify-content: space-between;">
+                <label>Transfer Amount:</label>
+                <label class="value">${{ (transfer_amount_cents / 100).toFixed(2) }}</label>
+            </div>
+            <div class="field" title="Processing fees for transaction">
+                <label>Fees:</label>
+                <label class="value">${{ (transfer_fee_cents / 100).toFixed(2) }}</label>
+            </div>
+            <div class="field" title="Total cost of this transfer">
+                <label style="font-weight: bold;">Total:</label>
+                <label class="value" style="font-weight: bold;">${{ ((transfer_amount_cents + transfer_fee_cents) / 100).toFixed(2) }}</label>
+            </div>
+
+            <hr>
+                        
+            <div class="field"><button @click="submitTransferRequest"><strong>Submit</strong></button></div>
+            <br>
+            <a class="header-text small" style="font-style: italic;">By pressing the submit button you agree to all terms and conditions and acknowledge that the details entered above are correct.</a>
+            <br>
+            <strong><a :class="{ success: !statusIsError, error: statusIsError }">{{ status_message }}</a></strong>
+        </div>
+    </div>
 
     <div class="footer">
         <div style="display: flex; flex-direction: row; align-items: center; padding-left: 10px;">
