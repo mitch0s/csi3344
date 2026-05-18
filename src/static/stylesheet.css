@@ -18,7 +18,7 @@ div.user-area {
     box-sizing: border-box;
     border: var(--dark-colour) solid 10px;
     margin: auto;
-    max-width: 550px;
+    max-width: 440px;
 }
 
 .user-area {
@@ -168,6 +168,20 @@ body {
     font-size: 24px;
 }
 
+button.floating {
+    width: 60px;
+    height: 60px;
+    margin-left: auto;
+    background-color: transparent;
+    color: var(--dark-colour);
+    border: solid 2px var(--dark-colour);
+    border-radius: 25%;
+    cursor: pointer;
+}
+
+.floating:hover {
+    box-shadow: 0 0 10px var(--dark-colour);
+}
 
 
 .user-avatar { 
@@ -183,8 +197,11 @@ body {
 }
 
 .content {
+    display: flex;
+    flex-direction: column;
     background-color: var(--light-colour);  /* rgb(227, 185, 255); */
     flex-grow: 1;
+    justify-content: right;
     height: auto ;
     min-height: 300px;
     border-radius: 10px;

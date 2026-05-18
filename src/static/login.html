@@ -66,8 +66,9 @@
                 <label for="password">Password:</label>
                 <input id="password" v-model="password" style="flex-grow: 1;">
             </div>
-            <div class="field"><button @click="requestLogin"><strong>Login</strong></button></div>
+            <div class="field"><button @click="requestLogin"><strong>Submit</strong></button></div>
         <strong><a :class="{ success: !statusIsError, error: statusIsError }">{{ status_message }}</a></strong>
+        <a class="header-text small" href="/register">register?</a>
         </div>
     </div>
 

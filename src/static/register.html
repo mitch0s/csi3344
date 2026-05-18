@@ -19,7 +19,7 @@
             },
 
             methods: {
-                async requestLogin() {
+                async requestRegistration() {
                     const response = await fetch("/api/v1/user/session/", {
                         method: "POST",
                         headers: {
@@ -32,7 +32,7 @@
                     if (response.status == 200) {
                         this.statusIsError = false;
                         document.cookie = body.data.session_token;
-                        this.status_message = "Login success. Redirecting."
+                        this.status_message = "Registration success. Redirecting."
                         setTimeout(() => { window.location = '/home';  }, 1000)
                     }
                     else {
@@ -73,8 +73,9 @@
                 <label for="password">Password:</label>
                 <input id="password" v-model="password" style="flex-grow: 1;">
             </div>
-            <div class="field"><button @click="requestLogin"><strong>Login</strong></button></div>
+            <div class="field"><button @click="requestRegistration"><strong>Submit</strong></button></div>
         <strong><a :class="{ success: !statusIsError, error: statusIsError }">{{ status_message }}</a></strong>
+        <a class="header-text small" href="/login">login?</a>
         </div>
     </div>
 

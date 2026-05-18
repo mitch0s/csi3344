@@ -22,6 +22,24 @@ async def list(request:Request):
     except UserNotFoundError           : return NotFoundResponse('invalid session token.')  # also return invalid session if user doesn't exist
     except RequestValidationError as e : return BadRequestResponse(str(e))
 
+async def create(request:Request):
+    try: 
+        session_token = parse_authorization_header(request.headers)
+        session:SQLiteSession = SQLiteSession(session_token)
+        session.validate_expiry()  # raises SessionExpiredError
+        
+        user:SQLiteUser = session.user
+        
+        account_data = []
+        for account in user.accounts:
+            account_data.append(account.data)
+
+        return SuccessResponse(content=account_data)
+    
+    except InvalidSessionError         : return NotFoundResponse('invalid session token.')
+    except UserNotFoundError           : return NotFoundResponse('invalid session token.')  # also return invalid session if user doesn't exist
+    except RequestValidationError as e : return BadRequestResponse(str(e))
+
 
 async def list_transactions(request:Request, id:int):
     try: 

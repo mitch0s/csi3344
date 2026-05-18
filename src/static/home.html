@@ -14,9 +14,7 @@
                 return {
                     websocket_url: "ws://127.0.0.1:8000/ws",
                     websocket: null,
-
                     live_user_count: "-",
-
                     accounts: []
                 }
             },
@@ -25,6 +23,11 @@
                 handleAccountNavigate(account) {
                     console.log(account.id);
                     window.location = '/account/' + account.id;
+                },
+
+                logout() {
+                    document.cookie = "";
+                    window.location = "/login";
                 },
 
                 connectWebsocket() {
@@ -75,12 +78,12 @@
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
-                            "Authorization": "Bearer ses_iCMFXreWQ0BlLTxXmmWXWJMIHQIJMtG1R5qg1fnK8RcsE9fBTuYOywlb2xVx8PNZ"
+                            "Authorization": "Bearer " + document.cookie
                         }
                     });
                     const body = await response.json();
                     console.log(body);
-                    if (response.status != 200) { return; }
+                    if (response.status != 200) { this.logout(); }
                     this.accounts = [];
                     for (var account of body.data) {
                         const t_account = {id: account.id, name: account.name, balance: account.balance_cents/100};
@@ -108,14 +111,8 @@
         </div>
 
         <div class="header right-container">
-            <p class="header-text" style="padding-right: 2px; overflow: hidden;">
-                Hello,
-            </p>
-
-            <a class="header-text underline" style="padding-right: 10px;" href="/profile">
-                Mitch!
-            </a>
-
+            <p class="header-text" style="padding-right: 2px; overflow: hidden;">Hello,</p>
+            <a class="header-text underline" style="padding-right: 10px;" href="/profile">Mitch!</a>
             <a href="/profile">
                 <img class="user-avatar" src="https://avatars.githubusercontent.com/u/67477144?v=4" height="64" width="64"/>
             </a>
@@ -131,15 +128,13 @@
                 <th></th>
             </tr>
 
-            <tr v-for="account in accounts" :key="account.id" :id="account.id" class="data-row">
+            <tr v-for="account in accounts" :key="account.id" :id="account.id" class="data-row" style="cursor: pointer;" @click="handleAccountNavigate(account)">
                 <td>{{ account.id }}</td>
                 <td>{{ account.name }}</td>
                 <td>${{ account.balance.toFixed(2) }}</td>
 
                 <td>
-                    <a @click="handleAccountNavigate(account)">
-                        <span class="material-symbols-outlined">arrow_outward</span>
-                    </a>
+                    <a><span class="material-symbols-outlined">arrow_outward</span></a>
                 </td>
             </tr>
         </table>
