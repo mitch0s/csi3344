@@ -1,5 +1,7 @@
 from fastapi import Request
-from api.object.sqlite import SQLiteSession, SQLiteUser, SQLiteAccount
+from api.object.sqlite.sqlite_session import SQLiteSession
+from api.object.sqlite.sqlite_user import SQLiteUser
+from api.object.sqlite.sqlite_account import SQLiteAccount
 from api.object.base.errors import *
 from api.response.json_response import *
 from api.util.parse_headers import parse_authorization_header

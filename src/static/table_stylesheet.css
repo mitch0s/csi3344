@@ -12,7 +12,7 @@ th {
 }
 
 td {
-    padding: 16px;
+    padding:  8px;
     background: rgb(255, 204, 110);
 }
 
@@ -39,6 +39,7 @@ tr.data-row td:last-child {
 
 tr.data-row {
     position: relative;
+    max-height: 60px;
 }
 
 tr.data-row::after {
@@ -48,8 +49,10 @@ tr.data-row::after {
     border-radius: 10px;
     pointer-events: none;
     transition: 0.2s ease;
+    max-height: 60px;
 }
 
 tr.data-row:hover::after {
     box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    max-height: 60px;
 }

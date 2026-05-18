@@ -1,11 +1,11 @@
 from api.object.base import BaseAccount
-from api.object.sqlite.SQLiteTransfer import SQLiteTransfer
+from api.object.sqlite.sqlite_transfer import SQLiteTransfer
 from api.db.sqlite import connection
 from api.object.base.errors import *
 
 
 class SQLiteAccount(BaseAccount):
-    def __init__(self, id: int):
+    def __init__(self, id:int):
         super().__init__(id)
 
     def _load(self):
@@ -86,4 +86,5 @@ class SQLiteAccount(BaseAccount):
     def data(self) -> dict:
         data = self.__dict__.copy()
         data.pop('user_id')
+        data.pop('owner')
         return data

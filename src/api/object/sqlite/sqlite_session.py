@@ -1,16 +1,14 @@
 import random
 from api.db.sqlite import connection
 from api.object.base.BaseSession import BaseSession
-from api.object.sqlite.SQLiteUser import SQLiteUser
+from api.object.sqlite.sqlite_user import SQLiteUser
 from api.object.base.errors import InvalidSessionError
 from api.util.dateutil import *
-
-
 
 class SQLiteSession(BaseSession):
     def __init__(self, token:str):
         super().__init__(token)
-
+        
     def _load(self):
         conn = connection()
         try:
@@ -47,8 +45,8 @@ class SQLiteSession(BaseSession):
 
             token = 'ses_' + ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', k=64))
 
-            created = timestamp_now_utc()
-            expiry = timestamp_now_utc(h=24)  # 24 hour session
+            created = timestamp_utc()
+            expiry = timestamp_utc(h=24)  # 24 hour session
 
             cur.execute(
                 """
@@ -70,5 +68,5 @@ class SQLiteSession(BaseSession):
         """
         Raise SessionExpiredError if current session exists but is expired.
         """
-        if not self.created_utc <= timestamp_now_utc() <= self.expiry_utc:
+        if not self.created_utc <= timestamp_utc() <= self.expiry_utc:
             raise InvalidSessionError()

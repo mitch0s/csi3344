@@ -13,9 +13,10 @@ import api.endpoint.v1.account as account_api
 import api.endpoint.v1.session as session_api
 import api.endpoint.v1.transfer as transfer_api
 
-from api.object.sqlite import SQLiteFeeManager
+from api.object.sqlite.sqlite_fee_manager import SQLiteFeeManager
+from api.worker import *
 
-from api.util.dateutil import timestamp_now_utc
+from api.util.dateutil import timestamp_utc
 from taskgroup import TaskGroup
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,9 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     logger.info("Starting up...")
+
+    # start up transaction processor
+    asyncio.create_task(g_transaction_processor.run_forever())
 
     yield
 
@@ -80,8 +84,9 @@ async def list_account_transfers(request:Request):
     return await transfer_api.create(request)
 
 
+# websocket stuff
 async def broadcast_new_user_count():
-    message = {'type': 'live_user_count', 'timestamp': timestamp_now_utc(), 'data': [{'value': len(active_websocket_sessions)}]}
+    message = {'type': 'live_user_count', 'timestamp': timestamp_utc(), 'data': [{'value': len(active_websocket_sessions)}]}
     ws_client:SessionWebSocket
     for ws_client in active_websocket_sessions:
         try: await ws_client.send_json(message)
@@ -134,7 +139,7 @@ async def websocket_endpoint(og_websocket:WebSocket):
             tg.create_task(ws_write_task(websocket))
             tg.create_task(ws_read_task(websocket))
     except Exception as error:
-        traceback.print_exc()
+        # traceback.print_exc()
         active_websocket_sessions.remove(websocket)
         await broadcast_new_user_count()
         logger.info(error)

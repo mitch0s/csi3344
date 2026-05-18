@@ -1,5 +1,6 @@
 from fastapi import Request
-from api.object.sqlite import SQLiteSession, SQLiteUser
+from api.object.sqlite.sqlite_session import SQLiteSession
+from api.object.sqlite.sqlite_user import SQLiteUser
 from api.object.base.errors import *
 from api.response.json_response import *
 from json import JSONDecodeError

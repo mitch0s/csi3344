@@ -11,6 +11,7 @@ class BaseAccount:
         self.status:str
         self.balance_cents:int = 0
         self.available_balance_cents:int = 0
+        self.owner:object  # BaseUser
         # call 'private' load method
         self._load()
 

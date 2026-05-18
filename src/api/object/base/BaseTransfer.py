@@ -38,4 +38,7 @@ class BaseTransfer:
     @staticmethod
     def create(sender:BaseAccount, reciever:BaseAccount, amount_cents:int, user_node:str=""):
         raise NotImplementedError()
+    
+    def related_user_ids(self) -> list[int]:
+        raise NotImplementedError()
 

@@ -1,6 +1,6 @@
 from api.db.sqlite import connection
-from api.object.base import BaseTransfer, BaseAccount
-from api.util.dateutil import timestamp_now_utc
+from api.object.base import BaseTransfer, BaseTransferItem, BaseAccount
+from api.util.dateutil import timestamp_utc
 
 
 class SQLiteTransfer(BaseTransfer):
@@ -27,21 +27,15 @@ class SQLiteTransfer(BaseTransfer):
 
             if row is None:
                 raise Exception("transfer not found")
-
             self.id = row[0]
             self.user_note = row[1]
             self.created_utc = row[2]
             self.status = row[3]
-
         finally:
             conn.close()
 
     @property
     def items(self):
-        # # cache result (avoid repeated db hits)
-        # if self._items is not None:
-        #     return self._items
-
         conn = connection()
         try:
             cur = conn.cursor()
@@ -61,15 +55,11 @@ class SQLiteTransfer(BaseTransfer):
             total = 0
 
             for row in rows:
-                item = {
-                    "id": row[0],
-                    "cr_account_id": row[2],
-                    "dr_account_id": row[3],
-                    "amount_cents": row[4],
-                    "type": row[5],
-                }
-
-                items.append(item)
+                ti = BaseTransferItem()
+                ti.id = row[0]
+                ti.amount_cents = row[4]
+                ti.type = row[5]
+                items.append(ti)
 
                 # treat as signed ledger movement if needed
                 total += row[4]
@@ -97,7 +87,7 @@ class SQLiteTransfer(BaseTransfer):
             'created_utc': self.created_utc,
             'user_note': self.user_note,
             'amount_cents': self.amount_cents,
-            'items': self.items
+            'items': [item.data for item in self.items]
         }
     
     @staticmethod
@@ -121,7 +111,7 @@ class SQLiteTransfer(BaseTransfer):
                 INSERT INTO transfer (user_note, created_utc, status)
                 VALUES (?, ?, ?)
                 """,
-                (user_note, timestamp_now_utc(), "pending")
+                (user_note, timestamp_utc(), "pending")
             )
 
             transfer_id = cur.lastrowid
@@ -152,6 +142,30 @@ class SQLiteTransfer(BaseTransfer):
         except Exception:
             conn.rollback()
             raise
+
+        finally:
+            conn.close()
+
+    def related_user_ids(self) -> list[int]:
+        conn = connection()
+
+        try:
+            cur = conn.cursor()
+
+            cur.execute(
+                """
+                SELECT DISTINCT a.user_id
+                FROM transfer_item ti
+                JOIN account a ON a.id = ti.cr_account_id
+                    OR a.id = ti.dr_account_id
+                WHERE ti.transaction_id = ?
+                """,
+                (self.id,)
+            )
+
+            rows = cur.fetchall()
+
+            return [row[0] for row in rows if row[0] is not None]
 
         finally:
             conn.close()

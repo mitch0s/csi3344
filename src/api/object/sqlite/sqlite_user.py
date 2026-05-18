@@ -1,14 +1,17 @@
-from .SQLiteAccount import SQLiteAccount
-from api.object.base import BaseUser, BaseAccount
-from api.object.base.errors import UserNotFoundError, InvalidPasswordError, AccountNotFoundError
-from api.db.sqlite import connection
+import time
 from api.util.hashing import *
+from api.db.sqlite import connection
+from api.object.base.BaseUser import BaseUser
+from api.object.base.BaseAccount import BaseAccount
+from api.object.sqlite.sqlite_account import SQLiteAccount
+from api.object.base.errors import UserNotFoundError, InvalidPasswordError, AccountNotFoundError
 
 
 class SQLiteUser(BaseUser):
     def __init__(self, id: int):
         super().__init__(id)
-
+        self._accounts = []
+        self._last_accounts_check = 0
     def _load(self):
         conn = connection()
         try:
@@ -64,17 +67,25 @@ class SQLiteUser(BaseUser):
     @property
     def accounts(self) -> list[BaseAccount]:
         conn = connection()
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT id FROM account WHERE user_id = ?", (self.id,))
-            rows = cur.fetchall()
-            return [SQLiteAccount(row[0]) for row in rows]
-
-        finally:
-            conn.close()
+        if time.time() - self._last_accounts_check > 30:
+            self._last_accounts_check = time.time()
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT id FROM account WHERE user_id = ?", (self.id,))
+                rows = cur.fetchall()
+                self._accounts = []
+                for row in rows:
+                    account = SQLiteAccount(row[0])
+                    account.owner = self
+                    self._accounts.append(account)
+            finally:
+                conn.close()
+        return self._accounts
 
     @property
     def data(self) -> dict:
         data = self.__dict__.copy()
         data.pop('password_hash')  # remove password hash from data dict
+        data.pop('_accounts')
+        data.pop('_last_accounts_check')
         return data

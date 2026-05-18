@@ -1,5 +1,9 @@
 from fastapi import Request
-from api.object.sqlite import SQLiteSession, SQLiteUser, SQLiteAccount, SQLiteTransfer, SQLiteFeeManager
+from api.object.sqlite.sqlite_session import SQLiteSession
+from api.object.sqlite.sqlite_user import SQLiteUser
+from api.object.sqlite.sqlite_account import SQLiteAccount
+from api.object.sqlite.sqlite_transfer import SQLiteTransfer
+from api.object.sqlite.sqlite_fee_manager import SQLiteFeeManager
 from api.object.base.errors import *
 from api.response.json_response import *
 from api.util.parse_headers import parse_authorization_header
@@ -17,7 +21,7 @@ async def create(request:Request):
             if item not in body : raise BadRequestResponse(f'This request is missing one or more required fields: {required_body_items}')
             value = body.get(item)
             if type(value) is not int : raise RequestValidationError(f'{item} field must be positive integer')
-            if value <= 0              : raise RequestValidationError(f'{item} field must be positive integer')
+            if value <= 0             : raise RequestValidationError(f'{item} field must be positive integer')
 
         user:SQLiteUser = session.user
         user_account:SQLiteAccount = user.get_account(body.get('user_account_id'))
