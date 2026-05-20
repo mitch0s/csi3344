@@ -58,6 +58,11 @@
                         this.websocket.send(JSON.stringify({"type": "client_auth", "data": [{"session_token": document.cookie}]}))
                     });
 
+                    this.websocket.addEventListener('close', (e) => {
+                        console.log('Socket closed. Reconnecting in 3 seconds...', e.reason);
+                        setTimeout(this.connectWebsocket, 3000); // Attempt to reconnect after a delay
+                    });
+
                     this.websocket.addEventListener('message', (e) => {
                         const event = JSON.parse(e.data);
                         const data = event.data;

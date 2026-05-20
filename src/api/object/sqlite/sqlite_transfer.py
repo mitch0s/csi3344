@@ -169,3 +169,6 @@ class SQLiteTransfer(BaseTransfer):
 
         finally:
             conn.close()
+
+    def amount_by_account_id(self, id:int):
+        pass

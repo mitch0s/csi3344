@@ -29,7 +29,8 @@ async def lifespan(app:FastAPI):
     # start up transaction processor
     asyncio.create_task(g_transaction_processor.run_forever())
 
-    yield
+    yield  # yields back to async manager.
+           # all code below this runs when async manager returns back (on server close)
 
     logger.info("Shutting down WebSocket clients...")
 

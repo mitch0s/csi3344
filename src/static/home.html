@@ -51,6 +51,11 @@
                         console.log('Websocket connected: ' + this.websocket_url);
                     });
 
+                    this.websocket.addEventListener('close', (e) => {
+                        console.log('Socket closed. Reconnecting in 3 seconds...', e.reason);
+                        setTimeout(this.connectWebsocket, 3000); // Attempt to reconnect after a delay
+                    });
+
                     this.websocket.addEventListener('message', (e) => {
                         const event = JSON.parse(e.data);
                         const data = event.data;
