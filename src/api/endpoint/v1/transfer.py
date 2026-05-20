@@ -7,6 +7,7 @@ from api.object.sqlite.sqlite_fee_manager import SQLiteFeeManager
 from api.object.base.errors import *
 from api.response.json_response import *
 from api.util.parse_headers import parse_authorization_header
+from api.worker import *
 
 # post
 async def create(request:Request):
@@ -38,6 +39,14 @@ async def create(request:Request):
             raise RequestValidationError('insufficient funds in user balance to process request.')
 
         transfer = SQLiteTransfer.create(sender=user_account, receiver=recipient_account, amount_cents=transfer_amount_cents, fee_cents=fee_amount_cents)
+
+        # send websocket message to active websockets that should receive update
+        related_user_ids = transfer.related_user_ids()
+        for websocket in active_websocket_sessions:
+            if not websocket.user.id in related_user_ids:
+                break
+            await websocket.send_transfer_created_message(transfer)
+
 
         return SuccessResponse(content=[{'transfer': transfer.data}])
     

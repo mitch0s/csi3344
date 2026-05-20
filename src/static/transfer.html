@@ -12,6 +12,9 @@
         createApp({
             data() {
                 return {
+                    REQUEST_UUID: crypto.randomUUID(), // unique request UUID for transaction. One TX per page load.
+
+                    user: {first_name: "", last_name: "", email: "", avatar_url: ""},
                     websocket_url: "ws://127.0.0.1:8000/ws",
                     websocket: null,
 
@@ -29,6 +32,19 @@
             },
 
             methods: {
+                async loadUser() {
+                    const response = await fetch("/api/v1/user/", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + document.cookie
+                        }
+                    });
+                    const body = await response.json();
+                    console.log(body);
+                    this.user = body.data;
+                },
+
                 logout() {
                     document.cookie = "";
                     window.location = "/login";
@@ -138,7 +154,8 @@
                         body: JSON.stringify({
                             "user_account_id": Number(this.user_account_id),
                             "recipient_account_id": Number(this.recipient_account_id),
-                            "transfer_amount_cents": Number(this.transfer_amount_cents)
+                            "transfer_amount_cents": Number(this.transfer_amount_cents),
+                            "request_uuid": this.REQUEST_UUID
                         })
                     });
                     const body = await response.json();
@@ -147,8 +164,9 @@
                     this.statusIsError = response.status != 200;
                     this.status_message = body.reason;
                     if (this.statusIsError == false) {
+                        this.status_message = "Transfer success. Navigating back to accounts..."
                         setTimeout(() => {
-                            window.location('/accounts')
+                            window.location = '/accounts'
                         }, 3000)
                     }
                     
@@ -158,6 +176,7 @@
 
             mounted() {
                 this.connectWebsocket();
+                this.loadUser();
                 this.getAccountList();
             }
         }).mount('#app');
@@ -176,9 +195,9 @@
 
         <div class="header right-container">
             <p class="header-text" style="padding-right: 2px; overflow: hidden;">Hello,</p>
-            <a class="header-text underline" style="padding-right: 10px;" href="/profile">Mitch!</a>
+            <a class="header-text underline" style="padding-right: 10px;" href="/profile">{{ this.user.first_name }}!</a>
             <a href="/profile">
-                <img class="user-avatar" src="https://avatars.githubusercontent.com/u/67477144?v=4" height="64" width="64"/>
+                <img class="user-avatar" :src="user.avatar_url" height="64" width="64"/>
             </a>
         </div>
     </div>
@@ -224,6 +243,8 @@
             <a class="header-text small" style="font-style: italic;">By pressing the submit button you agree to all terms and conditions and acknowledge that the details entered above are correct.</a>
             <br>
             <strong><a :class="{ success: !statusIsError, error: statusIsError }">{{ status_message }}</a></strong>
+            <br>
+            <i><a class="header-text small" style="white-space: nowrap;">Request ID: {{ this.REQUEST_UUID }}</a></i>
         </div>
     </div>
 

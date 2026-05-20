@@ -1,5 +1,5 @@
 import pytest
-from api.object.sqlite import SQLiteFeeManager, FeeTier
+from api.object.sqlite.sqlite_fee_manager import SQLiteFeeManager, FeeTier
 from api.object.base.errors import FeeNotFoundError
 
 

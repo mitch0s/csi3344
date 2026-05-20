@@ -12,6 +12,7 @@
         createApp({
             data() {
                 return {
+                    user: {first_name: "", last_name: "", email: "", avatar_url: ""},
                     websocket_url: "ws://127.0.0.1:8000/ws",
                     websocket: null,
                     live_user_count: "-",
@@ -20,6 +21,19 @@
             },
 
             methods: {
+                async loadUser() {
+                    const response = await fetch("/api/v1/user/", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + document.cookie
+                        }
+                    });
+                    const body = await response.json();
+                    console.log(body);
+                    this.user = body.data;
+                },
+
                 handleAccountNavigate(account) {
                     console.log(account.id);
                     window.location = '/account/' + account.id;
@@ -95,6 +109,7 @@
 
             mounted() {
                 this.connectWebsocket();
+                this.loadUser();
                 this.getAccountList();
             }
         }).mount('#app');
@@ -113,9 +128,9 @@
 
         <div class="header right-container">
             <p class="header-text" style="padding-right: 2px; overflow: hidden;">Hello,</p>
-            <a class="header-text underline" style="padding-right: 10px;" href="/profile">Mitch!</a>
+            <a class="header-text underline" style="padding-right: 10px;" href="/profile">{{ this.user.first_name }}!</a>
             <a href="/profile">
-                <img class="user-avatar" src="https://avatars.githubusercontent.com/u/67477144?v=4" height="64" width="64"/>
+                <img class="user-avatar" :src="user.avatar_url" height="64" width="64"/>
             </a>
         </div>
     </div>

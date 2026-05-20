@@ -12,6 +12,7 @@
         createApp({
             data() {
                 return {
+                    user: {first_name: "", last_name: "", email: "", avatar_url: ""},
                     websocket_url: "ws://127.0.0.1:8000/ws",
                     websocket: null,
                     live_user_count: "-",
@@ -20,6 +21,19 @@
             },
 
             methods: {
+                async loadUser() {
+                    const response = await fetch("/api/v1/user/", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + document.cookie
+                        }
+                    });
+                    const body = await response.json();
+                    console.log(body);
+                    this.user = body.data;
+                },
+                
                 handleAccountNavigate(account) {
                     console.log(account.id);
                     window.location = '/account/' + account.id + '/';
@@ -103,7 +117,7 @@
                     if (response.status != 200) { this.logout(); }
                     this.accounts = [];
                     for (var account of body.data) {
-                        const t_account = {id: account.id, name: account.name, balance: account.balance_cents/100};
+                        const t_account = {id: account.id, name: account.name, balance: account.balance_cents/100, pending_balance: account.pending_balance_cents/100};
                         console.log(t_account); 
                         this.accounts.push(t_account);
                     }
@@ -112,6 +126,7 @@
 
             mounted() {
                 this.connectWebsocket();
+                this.loadUser();
                 this.getAccountList();
             }
         }).mount('#app');
@@ -130,9 +145,9 @@
 
         <div class="header right-container">
             <p class="header-text" style="padding-right: 2px; overflow: hidden;">Hello,</p>
-            <a class="header-text underline" style="padding-right: 10px;" href="/profile">Mitch!</a>
+            <a class="header-text underline" style="padding-right: 10px;" href="/profile">{{ this.user.first_name }}!</a>
             <a href="/profile">
-                <img class="user-avatar" src="https://avatars.githubusercontent.com/u/67477144?v=4" height="64" width="64"/>
+                <img class="user-avatar" :src="user.avatar_url" height="64" width="64"/>
             </a>
         </div>
     </div>
@@ -142,14 +157,17 @@
             <tr>
                 <th>ID</th>
                 <th>Account Name</th>
-                <th>Account Balance</th>
+                <th>Available Balance</th>
+                <th>Pending Balance</th>
                 <th></th>
             </tr>
 
             <tr v-for="account in accounts" :key="account.id" :id="account.id" class="data-row" style="cursor: pointer;" @click="handleAccountNavigate(account)" title="View account details">
                 <td>{{ account.id }}</td>
                 <td>{{ account.name }}</td>
-                <td>${{ account.balance.toFixed(2) }}</td>
+                <td>${{account.balance.toFixed(2)}}</td>
+                <td v-if="account.balance != account.pending_balance"><i>${{account.pending_balance.toFixed(2)}}</i></td>
+                <td v-else>-</td>
 
                 <td>
                     <a><span class="material-symbols-outlined">arrow_outward</span></a>

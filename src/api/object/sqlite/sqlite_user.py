@@ -12,13 +12,14 @@ class SQLiteUser(BaseUser):
         super().__init__(id)
         self._accounts = []
         self._last_accounts_check = 0
+    
     def _load(self):
         conn = connection()
         try:
             cur = conn.cursor()
             cur.execute(
                 """
-                SELECT id, first_name, last_name, email_address, password_hash, created_utc, status
+                SELECT id, first_name, last_name, email_address, password_hash, avatar_url, created_utc, status
                 FROM user
                 WHERE id = ?
                 """,
@@ -35,8 +36,9 @@ class SQLiteUser(BaseUser):
             self.last_name = row[2]
             self.email_address = row[3]
             self.password_hash = row[4]
-            self.created_utc = row[5]
-            self.status = row[6]
+            self.avatar_url = row[5]
+            self.created_utc = row[6]
+            self.status = row[7]
 
         finally:
             conn.close()

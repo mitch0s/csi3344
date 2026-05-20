@@ -13,7 +13,7 @@ class TransactionProcessor:
     """
 
     CHECK_INTERVAL_SECONDS = 1
-    COMPLETE_AFTER_SECONDS = 5
+    COMPLETE_AFTER_SECONDS = 10
 
     def __init__(self):
         self.running = False
@@ -55,7 +55,6 @@ class TransactionProcessor:
 
                 # iso-8601 utc timestamps compare correctly as strings
                 if now >= expiry_timestamp:
-
                     cur.execute(
                         """
                         UPDATE transfer

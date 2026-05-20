@@ -16,11 +16,26 @@
                     websocket: null,
                     account_id: 0,
                     live_user_count: "-",
-                    transfers: []
+                    transfers: [],
+
+                    user: {first_name: "", last_name: "", email: "", avatar_url: ""}
                 }
             },
 
             methods: {
+                async loadUser() {
+                    const response = await fetch("/api/v1/user/", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + document.cookie
+                        }
+                    });
+                    const body = await response.json();
+                    console.log(body);
+                    this.user = body.data;
+                },
+
                 logout() {
                     document.cookie = "";
                     window.location = "/login";
@@ -98,7 +113,7 @@
                     });
                     const body = await response.json();
                     console.log(body);
-                    if (response.status != 200) {} // { this.logout(); }
+                    if (response.status != 200) { window.location = '/accounts' } // { this.logout(); }
                     this.transfers = [];
                     for (var transfer of body.data) { 
                         const t_transfer = {
@@ -116,6 +131,7 @@
 
             mounted() {
                 this.parseURL();
+                this.loadUser();
                 this.connectWebsocket();
                 this.getTransferList();
             }
@@ -135,9 +151,9 @@
 
         <div class="header right-container">
             <p class="header-text" style="padding-right: 2px; overflow: hidden;">Hello,</p>
-            <a class="header-text underline" style="padding-right: 10px;" href="/profile">Mitch!</a>
+            <a class="header-text underline" style="padding-right: 10px;" href="/profile">{{ this.user.first_name }}!</a>
             <a href="/profile">
-                <img class="user-avatar" src="https://avatars.githubusercontent.com/u/67477144?v=4" height="64" width="64"/>
+                <img class="user-avatar" :src="user.avatar_url" height="64" width="64"/>
             </a>
         </div>
     </div>
@@ -148,7 +164,7 @@
                 <th>ID</th>
                 <th>Date</th>
                 <th>Amount</th>
-                <th></th>
+                <th>Note</th>
                 <th></th>
             </tr>
 
@@ -156,12 +172,9 @@
                 <td>{{ transfer.id }}</td>
                 <td>{{ transfer.created_utc }}</td>
                 <td>${{ (transfer.amount_cents/100).toFixed(2) }}</td>
+                <td>This is a test note{{ transfer.user_note }}</td>
                 <td v-if="transfer.status !== 'processed'" style="font-style: italic;">{{ transfer.status }}</td>
                 <td v-else></td>
-
-                <td>
-                    <a><span class="material-symbols-outlined">arrow_outward</span></a>
-                </td>
             </tr>
         </table>
 

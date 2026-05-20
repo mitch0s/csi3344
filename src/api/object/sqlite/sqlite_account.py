@@ -37,14 +37,14 @@ class SQLiteAccount(BaseAccount):
                 """
                 SELECT COALESCE(SUM(
                     CASE
-                        WHEN ti.cr_account_id = ? THEN ti.amount_cents
                         WHEN ti.dr_account_id = ? THEN -ti.amount_cents
+                        WHEN ti.cr_account_id = ? AND ti.type != 'fees' THEN ti.amount_cents
                         ELSE 0
                     END
                 ), 0)
                 FROM transfer_item ti
                 JOIN transfer t ON t.id = ti.transaction_id
-                WHERE (ti.cr_account_id = ? OR ti.dr_account_id = ?)
+                WHERE (ti.dr_account_id = ? OR ti.cr_account_id = ?)
                 AND t.status = 'processed'
                 """,
                 (self.id, self.id, self.id, self.id)
@@ -52,6 +52,26 @@ class SQLiteAccount(BaseAccount):
 
             balance_row = cur.fetchone()
             self.balance_cents = balance_row[0] if balance_row else 0
+
+            # PENDING (everything except cancelled/failed)
+            cur.execute(
+                """
+                SELECT COALESCE(SUM(
+                    CASE
+                        WHEN ti.dr_account_id = ? THEN -ti.amount_cents
+                        WHEN ti.cr_account_id = ? AND ti.type != 'fees' THEN ti.amount_cents
+                        ELSE 0
+                    END
+                ), 0)
+                FROM transfer_item ti
+                JOIN transfer t ON t.id = ti.transaction_id
+                WHERE (ti.dr_account_id = ? OR ti.cr_account_id = ?)
+                AND t.status IN ('processed', 'pending', 'processing')
+                """,
+                (self.id, self.id, self.id, self.id)
+            )
+
+            self.pending_balance_cents = cur.fetchone()[0] or 0
 
         finally:
             conn.close()
