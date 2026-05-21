@@ -58,7 +58,9 @@ async def list_transactions(request:Request, id:int):
 
         transaction_data = []
         for transfer in account.transfers:
-            transaction_data.append(transfer.data)
+            data = transfer.data
+            data['amount_cents'] = transfer.amount_by_account_id(id=account.id)
+            transaction_data.append(data)
 
         # user = SQLiteUser(id=1)
         return SuccessResponse(transaction_data)

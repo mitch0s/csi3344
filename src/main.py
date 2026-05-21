@@ -49,7 +49,7 @@ app = FastAPI(lifespan=lifespan)
 # static content retrieval.
 @app.get("/")
 async def redirect():
-    return RedirectResponse('/home')
+    return RedirectResponse('/accounts')
 
 @app.get("/{file}")
 async def get_file(request:Request, file:str):

@@ -61,7 +61,7 @@ div.user-area {
 .field input {
     flex: 1;
     width: 100%;
-    min-width: 2px;
+    min-width: 200px;
     background-color: white;
     border: var(--light-colour) solid 3px;
     border-radius: 5px;
@@ -72,7 +72,7 @@ div.user-area {
 .field select {
     flex: 1;
     width: 100%;
-    min-width: 230px;
+    min-width: 260px;
     background-color: white;
     border: var(--light-colour) solid 3px;
     border-radius: 5px;

@@ -7,6 +7,7 @@ from api.object.sqlite.sqlite_fee_manager import SQLiteFeeManager
 from api.object.base.errors import *
 from api.response.json_response import *
 from api.util.parse_headers import parse_authorization_header
+from api.util.validate import validate_user_note
 from api.worker import *
 
 # post
@@ -27,6 +28,10 @@ async def create(request:Request):
         user:SQLiteUser = session.user
         user_account:SQLiteAccount = user.get_account(body.get('user_account_id'))
 
+        if user_account.id == body.get('recipient_account_id'):
+            raise RequestValidationError('Sender and recipient accounts must be different accounts.')
+
+
         recipient_account_id = body.get('recipient_account_id')
         try: recipient_account = SQLiteAccount(recipient_account_id)
         except AccountNotFoundError: raise AccountNotFoundError('Recipient account could not be found')
@@ -37,8 +42,11 @@ async def create(request:Request):
         total_amount_cents = transfer_amount_cents + fee_amount_cents
         if total_amount_cents > user_account.balance_cents:
             raise RequestValidationError('insufficient funds in user balance to process request.')
+        
 
-        transfer = SQLiteTransfer.create(sender=user_account, receiver=recipient_account, amount_cents=transfer_amount_cents, fee_cents=fee_amount_cents)
+        user_note = validate_user_note(value=body.get('user_note', ''))
+
+        transfer = SQLiteTransfer.create(sender=user_account, receiver=recipient_account, amount_cents=transfer_amount_cents, fee_cents=fee_amount_cents, user_note=user_note)
 
         # send websocket message to active websockets that should receive update
         related_user_ids = transfer.related_user_ids()

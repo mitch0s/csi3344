@@ -143,15 +143,14 @@
     <div class="header spaced-container">
         <div class="header left-container" style="padding-left: 25px; gap: 20px;">
             <strong><a class="header-text large" >Mitchwealth Bank Australia</a></strong>
-            <a class="header-text medium" href="/home">Home</a>
             <a class="header-text medium" href="/accounts">Accounts</a>
             <a class="header-text medium" href="/transfer">Transfer</a>
         </div>
 
         <div class="header right-container">
             <p class="header-text" style="padding-right: 2px; overflow: hidden;">Hello,</p>
-            <a class="header-text underline" style="padding-right: 10px;" href="/profile">{{ this.user.first_name }}!</a>
-            <a href="/profile">
+            <a class="header-text underline" style="padding-right: 10px;" href="">{{ this.user.first_name }}!</a>
+            <a href="">
                 <img class="user-avatar" :src="user.avatar_url" height="64" width="64"/>
             </a>
         </div>

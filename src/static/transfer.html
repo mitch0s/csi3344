@@ -23,6 +23,7 @@
                     transfer_amount_input: null,
                     transfer_amount_cents: null,
                     transfer_fee_cents: null,
+                    user_note: "",
 
                     live_user_count: "-",
                     statusIsError: false,
@@ -160,6 +161,7 @@
                             "user_account_id": Number(this.user_account_id),
                             "recipient_account_id": Number(this.recipient_account_id),
                             "transfer_amount_cents": Number(this.transfer_amount_cents),
+                            "user_note": this.user_note,
                             "request_uuid": this.REQUEST_UUID
                         })
                     });
@@ -193,15 +195,14 @@
     <div class="header spaced-container">
         <div class="header left-container" style="padding-left: 25px; gap: 20px;">
             <strong><a class="header-text large" >Mitchwealth Bank Australia</a></strong>
-            <a class="header-text medium" href="/home">Home</a>
             <a class="header-text medium" href="/accounts">Accounts</a>
             <a class="header-text medium" href="/transfer">Transfer</a>
         </div>
 
         <div class="header right-container">
             <p class="header-text" style="padding-right: 2px; overflow: hidden;">Hello,</p>
-            <a class="header-text underline" style="padding-right: 10px;" href="/profile">{{ this.user.first_name }}!</a>
-            <a href="/profile">
+            <a class="header-text underline" style="padding-right: 10px;" href="">{{ this.user.first_name }}!</a>
+            <a href="">
                 <img class="user-avatar" :src="user.avatar_url" height="64" width="64"/>
             </a>
         </div>
@@ -225,6 +226,12 @@
                 <span for="transfer_amount_input" style="color: white;">$</span>
                 <input id="transfer_amount_input" v-model="transfer_amount_input" inputmode="decimal" @input="onAmountInput">
             </div>
+            <div class="field" title="(optional) Message to recipient">
+                <label for="user_note">User Note <a class="header-text small", style="font-style: italic;">(optional)</a></label>
+            </div>
+            <div class="field" title="(optional) Message to recipient">
+                <input id="user_note" v-model="user_note">
+            </div>
 
             <hr>
 
@@ -240,7 +247,7 @@
                 <label style="font-weight: bold;">Total:</label>
                 <label class="value" style="font-weight: bold;">${{ ((transfer_amount_cents + transfer_fee_cents) / 100).toFixed(2) }}</label>
             </div>
-
+            
             <hr>
                         
             <div class="field"><button @click="submitTransferRequest"><strong>Submit</strong></button></div>

@@ -3,7 +3,7 @@ import re
 from api.object.base.errors import RequestValidationError
 
 
-def validate_first_name(value: str) -> None:
+def validate_first_name(value:str) -> None:
     """
     Raises RequestValidationError if value argument fails validation
     for first name
@@ -24,7 +24,7 @@ def validate_first_name(value: str) -> None:
         raise RequestValidationError('First name contains invalid characters')
 
 
-def validate_last_name(value: str) -> None:
+def validate_last_name(value:str) -> None:
     """
     Raises RequestValidationError if value argument fails validation
     for last name
@@ -45,7 +45,7 @@ def validate_last_name(value: str) -> None:
         raise RequestValidationError('Last name contains invalid characters')
 
 
-def validate_email_address(value: str) -> None:
+def validate_email_address(value:str) -> None:
     """
     Raises RequestValidationError if value argument fails validation
     for email address
@@ -68,7 +68,7 @@ def validate_email_address(value: str) -> None:
         raise RequestValidationError('Invalid email address')
 
 
-def validate_password(value: str) -> None:
+def validate_password(value:str) -> None:
     """
     Raises RequestValidationError if value argument fails validation
     for password
@@ -94,3 +94,10 @@ def validate_password(value: str) -> None:
 
     if not re.search(r'[^A-Za-z0-9]', value):
         raise RequestValidationError('Password must contain special character')
+    
+def validate_user_note(value:str) -> str:
+    allowlist = 'abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-{[]}|\\;:,.<>/'
+    for char in value:
+        if char not in allowlist:
+            raise RequestValidationError('User note must not contain any special characters.')
+    return value

@@ -3,8 +3,8 @@ from .BaseAccount import BaseAccount
 class BaseTransferItem:
     def __init__(self):
         self.id:int
-        self.creditor:BaseAccount
-        self.debtor:BaseAccount
+        self.creditor:BaseAccount = None
+        self.debtor:BaseAccount = None
         self.amount_cents:int
         self.type:str
 

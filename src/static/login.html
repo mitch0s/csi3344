@@ -34,7 +34,7 @@
                         this.statusIsError = false;
                         document.cookie = body.data.session_token;
                         this.status_message = "Login success. Redirecting."
-                        setTimeout(() => { window.location = '/home';  }, 1000)
+                        setTimeout(() => { window.location = '/accounts';  }, 1000)
                     }
                     else {
                         this.statusIsError = true;

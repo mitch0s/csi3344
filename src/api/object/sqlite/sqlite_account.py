@@ -39,6 +39,7 @@ class SQLiteAccount(BaseAccount):
                     CASE
                         WHEN ti.dr_account_id = ? THEN -ti.amount_cents
                         WHEN ti.cr_account_id = ? AND ti.type != 'fees' THEN ti.amount_cents
+                        WHEN ti.dr_account_id != ? AND ti.type = 'fees' THEN ti.amount_cents
                         ELSE 0
                     END
                 ), 0)
@@ -47,7 +48,7 @@ class SQLiteAccount(BaseAccount):
                 WHERE (ti.dr_account_id = ? OR ti.cr_account_id = ?)
                 AND t.status = 'processed'
                 """,
-                (self.id, self.id, self.id, self.id)
+                (self.id, self.id, self.id, self.id, self.id)
             )
 
             balance_row = cur.fetchone()
@@ -59,7 +60,8 @@ class SQLiteAccount(BaseAccount):
                 SELECT COALESCE(SUM(
                     CASE
                         WHEN ti.dr_account_id = ? THEN -ti.amount_cents
-                        WHEN ti.cr_account_id = ? AND ti.type != 'fees' THEN ti.amount_cents
+                        WHEN ti.cr_account_id = ? THEN ti.amount_cents
+                        WHEN ti.dr_account_id != ? AND ti.type = 'fees' THEN ti.amount_cents
                         ELSE 0
                     END
                 ), 0)
@@ -68,7 +70,7 @@ class SQLiteAccount(BaseAccount):
                 WHERE (ti.dr_account_id = ? OR ti.cr_account_id = ?)
                 AND t.status IN ('processed', 'pending', 'processing')
                 """,
-                (self.id, self.id, self.id, self.id)
+                (self.id, self.id, self.id, self.id, self.id)
             )
 
             self.pending_balance_cents = cur.fetchone()[0] or 0

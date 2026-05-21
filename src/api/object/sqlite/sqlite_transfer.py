@@ -16,7 +16,7 @@ class SQLiteTransfer(BaseTransfer):
 
             cur.execute(
                 """
-                SELECT id, user_note, created_utc, status
+                SELECT id, status, user_note, created_utc
                 FROM transfer
                 WHERE id = ?
                 """,
@@ -28,9 +28,9 @@ class SQLiteTransfer(BaseTransfer):
             if row is None:
                 raise Exception("transfer not found")
             self.id = row[0]
-            self.user_note = row[1]
-            self.created_utc = row[2]
-            self.status = row[3]
+            self.status = row[1]
+            self.user_note = row[2]
+            self.created_utc = row[3]
         finally:
             conn.close()
 
@@ -171,4 +171,28 @@ class SQLiteTransfer(BaseTransfer):
             conn.close()
 
     def amount_by_account_id(self, id:int):
-        pass
+        conn = connection()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                SELECT COALESCE(SUM(
+                    CASE
+                        WHEN ti.dr_account_id = ? THEN -ti.amount_cents
+                        WHEN ti.cr_account_id = ? THEN ti.amount_cents
+                        ELSE 0
+                    END
+                ), 0)
+                FROM transfer_item ti
+                JOIN transfer t ON t.id = ti.transaction_id
+                WHERE (ti.dr_account_id = ? OR ti.cr_account_id = ?)
+                AND t.id = ?
+                """,
+                (id, id, id, id, self.id)
+            )
+
+            rows = cur.fetchall()
+            return [row[0] for row in rows if row[0] is not None]
+
+        finally:
+            conn.close()
